@@ -3,6 +3,9 @@ import { View, Text, TextInput, ScrollView, ActivityIndicator, TouchableOpacity 
 import { Button, Card, CheckBox } from "react-native-elements";
 import emitter from "./customEventEmitter";
 import { REACT_APP_URL } from '@env';
+import { db } from '../firebaseConfig';
+import { collection, getDoc, doc, addDoc, setDoc, query, getDocs, where, Timestamp, deleteDoc } from 'firebase/firestore';
+
 
 async function postExercise(name, description, userid) {
     const requestOptions = {
@@ -55,12 +58,15 @@ export function AddExercise({ navigation, route }) {
         try {
             setLoading(true);
             console.log(route.params.userid)
-            const response = await postExercise(text, '', userid);
-            if (workoutId != null) {
-                console.log("workoutid " + workoutId)
-                console.log("reponseid " + response.id)
-                const workoutResponse = await postWorkoutExercise(response.id, workoutId);
-            }
+            const documentData = {
+                exe_date: Timestamp.fromDate(new Date()),
+                exe_name: text,
+                exe_max_reps: 0,
+                exe_max_weight: 0,
+                exe_usr_id: route.params.userid
+            };
+            const docRef = await addDoc(collection(db, "Exercise"), documentData);
+            //console.log(await docRef.getDoc().data());
         }
         catch (error) {
             console.log(error);
@@ -93,30 +99,21 @@ export function AddExercise({ navigation, route }) {
 
     // fetch defaults
     useEffect(() => {
-        console.log(REACT_APP_URL);
         setLoading(true);
-
         const getAllExercises = async () => {
 
             console.log("fetching default exercises");
-            console.log(REACT_APP_URL);
-            try {
-                const responseDefault = await fetch(REACT_APP_URL + '/Defaults?type=exercise&id=' + userid)
-                const jsonDefault = await responseDefault.json();
-
-                const responseUser = await fetch(REACT_APP_URL + '/exercise/' + userid);
-                const jsonUser = await responseUser.json();
-
-                const combined = jsonDefault.concat(jsonUser);
-                console.log(combined)
-                setFilteredDataSource(combined);
-                setMasterDataSource(combined);
-                setLoading(false);
-            } catch (error) {
-                console.log(error);
-            }
-
-
+            const collectionRef = collection(db, 'Default_exercises');
+            const q = query(collectionRef);
+            const docSnap = await getDocs(q);
+            const docDataArray = [];
+            await docSnap.forEach(async (doc) => {
+                const docData = await doc.data();
+                docDataArray.push(docData);
+            });
+            setFilteredDataSource(docDataArray);
+            setMasterDataSource(docDataArray);
+            setLoading(false);
         };
         getAllExercises();
     }, []);
@@ -130,10 +127,8 @@ export function AddExercise({ navigation, route }) {
                 function (item) {
                     // Applying filter for the inserted text in search bar
                     var itemData = '';
-                    if (item.def_value != null) {
-                        itemData = item.def_value ? item.def_value.toUpperCase() : ''.toUpperCase();
-                    } else {
-                        itemData = item.exe_Name ? item.exe_Name.toUpperCase() : ''.toUpperCase();
+                    if (item.exe_name != null) {
+                        itemData = item.exe_name ? item.exe_name.toUpperCase() : ''.toUpperCase();
                     }
                     const textData = text.toUpperCase();
                     return itemData.indexOf(textData) > -1;
@@ -175,9 +170,9 @@ export function AddExercise({ navigation, route }) {
                             filteredDataSource.length > 0 ? (
                                 filteredDataSource.map((item, i) => {
                                     return (
-                                        <TouchableOpacity onPress={() => item.def_value != null ? addExercise(item.def_value) : addWorkoutExercise(item.id, workoutId)}>
+                                        <TouchableOpacity onPress={() => item.exe_name != null ? addExercise(item.exe_name) : addWorkoutExercise(item.id, workoutId)}>
                                             <Card key={i} containerStyle={{ padding: 15, borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
-                                                <Text>{item.def_value != null ? item.def_value : item.exe_Name}</Text>
+                                                <Text>{item.exe_name != null ? item.exe_name : item.exe_name}</Text>
                                             </Card>
                                         </TouchableOpacity>
                                     )
