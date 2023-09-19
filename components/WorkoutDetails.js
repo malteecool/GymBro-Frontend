@@ -58,7 +58,7 @@ export function WorkoutDetails({ navigation, route }) {
         }
     };
     useEffect(() => {
-        getWorkoutExercises();
+        //getWorkoutExercises();
     }, []);
 
     const saveWorkout = async () => {
@@ -164,7 +164,7 @@ export function WorkoutDetails({ navigation, route }) {
                                         <Text><MaterialCommunityIcons name='calendar-range' size={16} />{workout.woe_exercise.exe_Date !== null ? new Date(Date.parse(workout.woe_exercise.exe_Date)).toDateString() : 'never'}</Text>
                                     </Card>
                                 </TouchableOpacity>))
-                        }
+                            }
                     </ScrollView>
 
                 </View>

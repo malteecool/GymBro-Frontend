@@ -5,30 +5,34 @@ import { ActivityIndicator } from 'react-native-paper';
 import { Card2 } from './customCard';
 import emitter from './customEventEmitter';
 import { REACT_APP_URL } from '@env';
+import { db } from '../firebaseConfig';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 
-async function postExercise(id, name, sets) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            "exh_Exe_Id": id,
-            "exh_Name": name,
-            "exh_Date": new Date(),
-            "exh_sets": sets
-        })
-    };
 
-    console.log(JSON.stringify({
-        "exh_Exe_Id": id,
-        "exh_Name": name,
-        "exh_Date": new Date(),
-        "exh_sets": sets
-    }))
-    const response = await fetch(REACT_APP_URL + '/ExerciseHistory', requestOptions);
+async function postExercise(id, sets) {
 
-    console.log(REACT_APP_URL)
-    const json = await response.json();
-    console.log(json);
+    try {
+        console.log(sets);
+        
+        const documentData = {
+            exh_date: Timestamp.fromDate(new Date()),
+            exh_exe_id: id
+        };
+        const docRef = await addDoc(collection(db, 'Exercise_history'), documentData);
+        console.log("doc id => " + await docRef.id);
+        if (sets.length > 0) {
+            sets.forEach(async (set) => {
+                console.log("adding set:" + set);
+                const setRef = await addDoc(collection(db, 'Exercise_history', docRef.id, 'sets'), {
+                    set_reps: set.set_reps,
+                    set_weight: set.set_weight
+                });
+            });
+        }
+    } catch (error) {
+        console.log(error);
+    }
+
 }
 
 export function AddSet({ navigation, route }) {
@@ -36,7 +40,7 @@ export function AddSet({ navigation, route }) {
     const exercise = route.params.exercise;
     const [isLoading, setLoading] = useState(false);
     const [data, setData] = useState([]);
-    console.log(REACT_APP_URL);
+    console.log(exercise);
     
     const childToParent = (childData) => {
         setData(childData);
@@ -45,7 +49,7 @@ export function AddSet({ navigation, route }) {
     const onAddHistory = async () => {
         try {
             setLoading(true);
-            await postExercise(exercise.id, exercise.exe_Name, data)
+            await postExercise(exercise.id, data)
         }
         
         catch (error) {

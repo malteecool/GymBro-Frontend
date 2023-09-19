@@ -19,9 +19,10 @@ import { WorkoutScreen } from './components/WorkoutScreen';
 import { WorkoutDetails } from './components/WorkoutDetails';
 import emitter from "./components/customEventEmitter";
 import { AddWorkout } from './components/AddWorkout';
+import { db } from './firebaseConfig';
+import { collection, getDoc, doc, addDoc, setDoc, query, getDocs, where } from 'firebase/firestore';
 
 WebBrowser.maybeCompleteAuthSession();
-
 
 const Stack = createNativeStackNavigator();
 
@@ -32,9 +33,9 @@ function ExerciseStackScreen(userInfo) {
                 component={ExcerciseScreen}
                 initialParams={{ userInfo: userInfo }}
                 options={{ headerShown: false }} />
-            <Stack.Screen name='exerciseDetails' component={ExerciseDetails} options={({ route }) => ({ title: route.params.exercise.exe_Name })} />
+            <Stack.Screen name='exerciseDetails' component={ExerciseDetails} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
             <Stack.Screen name='addExercise' component={AddExercise} options={({ route }) => ({ title: 'New exercise' })} />
-            <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({ title: route.params.exercise.exe_Name })} />
+            <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
         </Stack.Navigator>
     )
 }
@@ -44,9 +45,9 @@ function WorkoutStackScreen(userInfo) {
         <Stack.Navigator>
             <Stack.Screen name='workouts' component={WorkoutScreen} initialParams={{ userInfo: userInfo }} options={{ headerShown: false }} />
             <Stack.Screen name='workoutDetails' component={WorkoutDetails} options={({ route }) => ({ title: route.params.workout.wor_name })} />
-            <Stack.Screen name='exerciseDetailsWorkout' component={ExerciseDetails} options={({ route }) => ({ title: route.params.exercise.exe_Name })} />
+            <Stack.Screen name='exerciseDetailsWorkout' component={ExerciseDetails} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
             <Stack.Screen name='addExercise' component={AddExercise} options={({ route }) => ({ title: 'New exercise' })} />
-            <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({ title: route.params.exercise.exe_Name })} />
+            <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
             <Stack.Screen name='addWorkout' component={AddWorkout} options={({ route }) => ({ title: 'New workout' })} />
         </Stack.Navigator>
     )
@@ -75,35 +76,29 @@ const getUserData = async (auth) => {
     console.log('getUserdata:');
     console.log(responseJson);
 
-
     return responseJson;
 };
 
 const addUser = async (userData) => {
-    try {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                usr_name: userData.name,
-                usr_token: userData.id
-            })
-        };
-        console.log(REACT_APP_URL);
+    console.log("Adding user");
+    const userDataMap = {
+        usr_name: userData.name,
+        usr_token: userData.id
+    }
 
-        const response = await fetch(REACT_APP_URL + '/users', requestOptions);
-        if (response.status == 201) {
-            console.log('user added');
-            const json = await response.json();
-            console.log(json);
-            return json;
-        } else {
-            console.log(response);
-        }
+    try {
+        const dbRef = collection(db, 'User');
+        const res = await addDoc(dbRef, {
+            usr_name: userData.name,
+            usr_token: userData.id
+        });
     } catch (error) {
         console.log(error);
     }
-    return null;
+    finally {
+        return await userExist(userData.id);
+    }
+
 }
 
 const logout = async () => {
@@ -122,15 +117,14 @@ const getClientId = () => {
 }
 
 const userExist = async (token) => {
-    console.log(token);
+    const collectionRef = collection(db, 'User');
+    const q = query(collectionRef, where("usr_token", "==", token));
+    const docSnap = await getDocs(q);
 
-    
-    const response = await fetch(`${REACT_APP_URL}/users/${token}`);
-    if (response.status == 404) {
-        return null;
-    }
-    const json = await response.json();
-    return json;
+    // return first user found.
+    const docData = await docSnap.docs[0].data();
+    console.log(docData);
+    return docData;
 }
 
 
@@ -143,9 +137,6 @@ export default function App() {
     const [request, response, promptAsync] = Google.useAuthRequest({
         androidClientId: process.env.REACT_APP_TOKEN,
     });
-
-
-    console.log(REACT_APP_URL);
 
     // first time sign in
     useEffect(() => {
@@ -180,7 +171,7 @@ export default function App() {
                 const userData = await getUserData(authFromJson);
                 if (userData.id) {
                     const dbUser = await userExist(userData.id);
-                    if (dbUser) {
+                    if (dbUser != null) {
                         setUserInfo(dbUser);
                     } else {
                         const newUser = await addUser(userData);
@@ -212,10 +203,6 @@ export default function App() {
         } finally {
             setLoading(false);
         }
-    };
-
-    const refreshToken = async () => {
-
     };
 
     return (
