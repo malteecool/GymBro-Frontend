@@ -5,6 +5,7 @@ npx react-native bundle --platform android --dev false --entry-file index.js --b
 2. in /gymbro/android 
 gradlew clean (?)
 gradlew assembleRelease
+APK will be available in android/outputs/apk/release
 
 
 3. To run the development build:

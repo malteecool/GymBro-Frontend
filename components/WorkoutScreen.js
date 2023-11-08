@@ -5,25 +5,45 @@ import { Card, Button } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import emitter from './customEventEmitter'
 import { REACT_APP_URL } from '@env';
-
+import { db } from "../firebaseConfig";
+import { collection, query, getDocs, where, Timestamp, getDoc, doc } from "firebase/firestore";
 
 export function WorkoutScreen({ navigation, route }) {
     const [data, setData] = useState([]);
 
-    
+    const getExerciseDocument = async (docId) => {
+        const exercises = query(collection(db, 'Workout', docId, 'workout_exercise'));
+        const docSnap = await getDocs(exercises);
+        var documentData = [];
+        // iterate each exercise
+        for (const exerciseDoc of docSnap.docs) {
+            const exerciseId = await exerciseDoc.data().woe_exercise;
+            const docRef = doc(db, "Exercise", exerciseId);
+            const exercise = await getDoc(docRef);
+            documentData.push(exercise.data());
+        }
+        return documentData;
+    };
+
     const [isLoading, setLoading] = useState(true);
     const user = route.params.userInfo.user;
 
     const getWorkouts = async () => {
-        console.log("fetching workouts")
+        console.log("fetching workouts");
         try {
             setLoading(true);
-            console.log(REACT_APP_URL);
-
-            const response = await fetch(REACT_APP_URL + '/workouts/' + user.id + '/all');
-            const json = await response.json();
-            console.log(json);
-            setData(json);
+            const collectionRef = collection(db, 'Workout');
+            const q = query(collectionRef, where("wor_usr_id", "==", user.usr_token));
+            const docSnap = await getDocs(q);
+            var workoutData = []
+            // iterate each workout
+            for (const doc of docSnap.docs) {
+                var tempDoc = doc.data();
+                var exerciseList = await getExerciseDocument(doc.id);
+                tempDoc = { id: doc.id, wor_workout_exercises: exerciseList, ...tempDoc };
+                workoutData.push(tempDoc);
+            }
+            setData(workoutData);
         }
         catch (error) {
             console.error(error)
@@ -91,7 +111,7 @@ export function WorkoutScreen({ navigation, route }) {
                 isLoading ? (<View><ActivityIndicator /><Text>Fetching Workouts...</Text></View>) : (
                     <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 20 }}>{
 
-                        data.map((item, i) => {
+                        data.map((item, i) => {             
                             return (
                                 <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetails', { workout: item }) }}>
                                     <Card key={i} containerStyle={{ borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
@@ -104,7 +124,7 @@ export function WorkoutScreen({ navigation, route }) {
                                             </View>
                                         </View>
                                         <Card.Divider color='black'></Card.Divider>
-                                        <Text><MaterialCommunityIcons name='calendar-range' size={16} /> {item.wor_last_done !== null ? new Date(Date.parse(item.wor_last_done)).toDateString() : 'never'}</Text>
+                                        <Text><MaterialCommunityIcons name='calendar-range' size={16} /> {item.wor_last_done !== null ? new Timestamp(item.wor_last_done.seconds, item.wor_last_done.nanoseconds).toDate().toDateString() : 'never'}</Text>
                                         <Text><MaterialCommunityIcons name='dumbbell' size={16} /> {Object.keys(item.wor_workout_exercises).length}</Text>
                                         <Text><MaterialCommunityIcons name='clock-time-four-outline' size={16} /> {getFormattedTime(item.wor_estimate_time)}</Text>
                                     </Card>

@@ -1,4 +1,4 @@
-import { Text, View, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Text, View, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -12,15 +12,13 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { AsyncStorage } from 'react-native';
 import * as AuthSession from 'expo-auth-session';
-import { REACT_APP_URL } from '@env'
 
 import { ExcerciseScreen } from './components/ExerciseScreen';
 import { WorkoutScreen } from './components/WorkoutScreen';
 import { WorkoutDetails } from './components/WorkoutDetails';
 import emitter from "./components/customEventEmitter";
 import { AddWorkout } from './components/AddWorkout';
-import { db } from './firebaseConfig';
-import { collection, getDoc, doc, addDoc, setDoc, query, getDocs, where } from 'firebase/firestore';
+import { getClientId, userExist, getUserData, addUser, logout } from './services/UserService';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -66,69 +64,8 @@ const updateWorkoutEmitter = () => {
     emitter.emit('workoutEvent', 0)
 }
 
-const getUserData = async (auth) => {
 
-    console.log(auth.accessToken);
-    let userInfoResponse = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-        headers: { Authorization: `Bearer ${auth.accessToken}` }
-    });
-    const responseJson = await userInfoResponse.json();
-    console.log('getUserdata:');
-    console.log(responseJson);
-
-    return responseJson;
-};
-
-const addUser = async (userData) => {
-    console.log("Adding user");
-    const userDataMap = {
-        usr_name: userData.name,
-        usr_token: userData.id
-    }
-
-    try {
-        const dbRef = collection(db, 'User');
-        const res = await addDoc(dbRef, {
-            usr_name: userData.name,
-            usr_token: userData.id
-        });
-    } catch (error) {
-        console.log(error);
-    }
-    finally {
-        return await userExist(userData.id);
-    }
-
-}
-
-const logout = async () => {
-    console.log('removing auth');
-    await AsyncStorage.removeItem('auth');
-};
-
-const getClientId = () => {
-    if (Platform.OS === 'ios') {
-        return process.env.REACT_APP_TOKEN;
-    } else if (Platform.OS === 'android') {
-        return process.env.REACT_APP_TOKEN;
-    } else {
-        console.log('Invalid platform - not handled');
-    }
-}
-
-const userExist = async (token) => {
-    const collectionRef = collection(db, 'User');
-    const q = query(collectionRef, where("usr_token", "==", token));
-    const docSnap = await getDocs(q);
-
-    // return first user found.
-    const docData = await docSnap.docs[0].data();
-    console.log(docData);
-    return docData;
-}
-
-
-// hadles login
+// handles login
 export default function App() {
     const [userInfo, setUserInfo] = useState();
     const [auth, setAuth] = useState();
@@ -178,7 +115,9 @@ export default function App() {
                         setUserInfo(newUser);
                     }
                 } else if (userData.error?.code == 401) {
+                    console.log("refreshing token")
                     const clientId = getClientId();
+                    console.log(clientId);
                     const tokenResult = await AuthSession.refreshAsync({
                         clientId: clientId,
                         refreshToken: authFromJson.refreshToken
