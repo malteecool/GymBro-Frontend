@@ -7,9 +7,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import emitter from "./customEventEmitter";
 import { REACT_APP_URL } from '@env';
 
+import { removeWorkoutExercise as removeWorkoutExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService';
+import { getWorkoutExercises } from '../services/WorkoutService';
+
 // https://www.reactnativeschool.com/build-a-stop-watch-hook-that-works-even-when-the-app-is-quit
-
-
 
 const updateWorkout = async (workoutid) => {
     console.log("post workout");
@@ -42,23 +43,20 @@ export function WorkoutDetails({ navigation, route }) {
 
     const workout = route.params.workout;
 
-    const getWorkoutExercises = async () => {
+    const load = async () => {
         try {
             setLoading(true);
-            console.log(REACT_APP_URL);
-            const response = await fetch(REACT_APP_URL + '/Workouts/' + workout.id);
-
-            const responseJson = await response.json();
-            console.log(responseJson);
-            setData(responseJson);
+            const documentData = await getWorkoutExercises(workout.id);
+            setData(documentData);
         } catch (error) {
             console.log(error);
         } finally {
             setLoading(false);
         }
     };
+
     useEffect(() => {
-        //getWorkoutExercises();
+        load();
     }, []);
 
     const saveWorkout = async () => {
@@ -77,31 +75,23 @@ export function WorkoutDetails({ navigation, route }) {
         }
     }
 
-    const removeWorkoutExercise = async (woe_id) => {
+    const removeWorkoutExercise = async (exe_id) => {
         try {
             setLoading(true);
-            const requestOptions = {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-            };
-            console.log(REACT_APP_URL);
-            console.log(woe_id);
-            const response = await fetch(REACT_APP_URL + '/Workouts/' + woe_id + '/removeexercise', requestOptions);
-            console.log(response.status);
-        }
+            await removeWorkoutExerciseService(workout.id, exe_id, null);
+        } 
         catch (error) {
-            console.error(error);
+            console.log(error);
         }
         finally {
-            setLoading(false);
-            getWorkoutExercises();
+            load();
         }
     };
 
     useEffect(() => {
         const listener = (data) => {
             console.log("workout event recieved");
-            getWorkoutExercises();
+            load();
         };
         emitter.on('workoutExerciseEvent', listener);
 
@@ -146,11 +136,11 @@ export function WorkoutDetails({ navigation, route }) {
                 <View>
                     <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 100 }}>
                         {
-                            data.wor_workout_exercises.map((workout, i) => (
-                                <TouchableOpacity key={workout.woe_exercise.exe_Name} onPress={() => { navigation.navigate('exerciseDetailsWorkout', { exercise: workout.woe_exercise }) }}>
+                            data.map((workout, i) => (
+                                <TouchableOpacity key={workout.exe_name} onPress={() => { navigation.navigate('exerciseDetailsWorkout', { exercise: workout }) }}>
                                     <Card key={i} containerStyle={{ borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
                                         <View style={{ flexDirection: 'row' }}>
-                                            <Card.Title>{workout.woe_exercise.exe_Name}</Card.Title>
+                                            <Card.Title>{workout.exe_name}</Card.Title>
                                             <View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'flex-end' }}>
                                                 <TouchableOpacity onPress={() => removeWorkoutExercise(workout.id)} style={{ margin: 0, padding: 3 }}>
                                                     <MaterialCommunityIcons name="trash-can-outline" size={16} color='highcontrastdark' />
@@ -159,12 +149,12 @@ export function WorkoutDetails({ navigation, route }) {
                                         </View>
                                         <Card.Divider color='black'></Card.Divider>
 
-                                        <Text><MaterialCommunityIcons name='weight-kilogram' size={16} />{workout.woe_exercise.exe_Max_Weight}</Text>
+                                        <Text><MaterialCommunityIcons name='weight-kilogram' size={16} />{workout.exe_max_weight}</Text>
 
-                                        <Text><MaterialCommunityIcons name='calendar-range' size={16} />{workout.woe_exercise.exe_Date !== null ? new Date(Date.parse(workout.woe_exercise.exe_Date)).toDateString() : 'never'}</Text>
+                                        <Text><MaterialCommunityIcons name='calendar-range' size={16} />{workout.exe_date !== null ? getFirebaseTimeStamp(workout.exe_date.seconds, workout.exe_date.milliseconds).toDateString() : 'never'}</Text>
                                     </Card>
                                 </TouchableOpacity>))
-                            }
+                        }
                     </ScrollView>
 
                 </View>

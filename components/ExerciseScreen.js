@@ -3,35 +3,19 @@ import React, { useEffect, useState } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Card, Button } from 'react-native-elements';
 import emitter from './customEventEmitter';
-import { REACT_APP_URL } from '@env';
-import { db } from '../firebaseConfig';
-import { collection, getDoc, doc, addDoc, setDoc, query, getDocs, where, Timestamp, deleteDoc } from 'firebase/firestore';
-
+import { getExercises, removeExercise as removeExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService'; 
 
 export function ExcerciseScreen({ navigation, route }) {
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState([]);
 
     const user = route.params.userInfo.user;
-
     // fetch exercises
-    const getExercises = async () => {
-        console.log("fetching exercises");
+    const load = async () => {
         try {
             setLoading(true);
-            console.log("user => " + user.usr_token);
-            const collectionRef = collection(db, 'Exercise');
-            const q = query(collectionRef, where("exe_usr_id", "==", user.usr_token));
-            const docSnap = await getDocs(q);
-
-            // would need a remap to create database like objects with id received from doc.id
-            var documentData = [];
-            docSnap.forEach(async (doc) => {
-                var exerciseDoc = { "id": doc.id, ...doc.data() };
-                console.log(exerciseDoc);
-                documentData.push(exerciseDoc);
-            })
-            setData(documentData);
+            const exercises = await getExercises(user.usr_token);
+            setData(exercises);
         }
         catch (error) {
             console.error(error)
@@ -40,38 +24,27 @@ export function ExcerciseScreen({ navigation, route }) {
             setLoading(false);
         }
     };
+
     useEffect(() => {
-        getExercises();
+        load();
     }, []);
 
     const removeExercise = async (exe_id) => {
-        // todo
         try {
-            console.log("delete exercise with id: " + exe_id);
-            /*const result = await deleteDoc(doc(db, "exercise", exe_id));
-            console.log(result);*/
-
-            const docRef = doc(db, "Exercise", exe_id);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                console.log(docSnap.data());
-            }
-
+            await removeExerciseService(exe_id, user.usr_token);
         }
         catch (error) {
             console.error(error)
         }
         finally {
-            getExercises();
+            load();
         }
     };
 
-
-    // on callback from add screen
     React.useEffect(() => {
         const listener = (data) => {
             console.log("event recieved");
-            getExercises();
+            load();
         };
         emitter.on('exerciseEvent', listener);
 
@@ -93,7 +66,7 @@ export function ExcerciseScreen({ navigation, route }) {
 
                     data.map((item, i) => {
 
-                        var ExerciseDate = new Timestamp(item.exe_date.seconds, item.exe_date.nanoseconds).toDate();
+                        var ExerciseDate = getFirebaseTimeStamp(item.exe_date.seconds, item.exe_date.nanoseconds);
 
                         return (
                             <TouchableOpacity key={item.exe_name} onPress={() => { navigation.navigate('exerciseDetails', { exercise: item }) }}>

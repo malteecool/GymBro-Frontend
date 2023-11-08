@@ -5,7 +5,7 @@ import { Button, Card } from "react-native-elements";
 import { REACT_APP_URL } from '@env'
 import { TabView, TabBar } from 'react-native-tab-view';
 import CustomExerciseView from "./CustomExerciseView";
-import { postWorkoutExercise } from './WorkoutService';
+import { postWorkoutExercise } from '../services/WorkoutService';
 
 export function AddWorkout({ navigation, route }) {
     const [isLoading, setLoading] = useState(false);
@@ -150,13 +150,13 @@ export function AddWorkout({ navigation, route }) {
                         }}
                             placeholder='Search'
                             value={search} />
-                        <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center'  }}>
+                        <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
                             {isLoading ? (
                                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                                     <ActivityIndicator />
                                 </View>
                             ) : (
-                                <ScrollView style={{  width:'100%', }} contentContainerStyle={{ paddingBottom: 120 }}>
+                                <ScrollView style={{ width: '100%', }} contentContainerStyle={{ paddingBottom: 120 }}>
                                     {
                                         filteredDataSource.length > 0 ? (
                                             filteredDataSource.map((item, i) => {

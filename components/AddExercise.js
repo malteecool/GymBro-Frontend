@@ -2,47 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
 import { Button, Card, CheckBox } from "react-native-elements";
 import emitter from "./customEventEmitter";
-import { REACT_APP_URL } from '@env';
 import { db } from '../firebaseConfig';
-import { collection, getDoc, doc, addDoc, setDoc, query, getDocs, where, Timestamp, deleteDoc } from 'firebase/firestore';
-
-
-async function postExercise(name, description, userid) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            exe_Name: name,
-            exe_Description: description,
-            exe_Max_Weight: 0,
-            exe_Max_Reps: 0,
-            exe_Date: new Date(),
-            exe_usr_id: userid
-        })
-    };
-    const response = await fetch(REACT_APP_URL + '/Exercise', requestOptions);
-
-    console.log(REACT_APP_URL);
-    const json = await response.json();
-    console.log(json);
-    return json;
-}
-
-
-
-async function postWorkoutExercise(exerciseId, workoutId) {
-
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-    };
-
-    const response = await fetch(`${REACT_APP_URL}/Workouts/${workoutId}/addexercise?exerciseId=${exerciseId}`, requestOptions);
-    console.log(REACT_APP_URL);
-    console.log(response.status);
-    const json = await response.json();
-    return json;
-}
+import { collection, addDoc, query, getDocs, Timestamp } from 'firebase/firestore';
 
 export function AddExercise({ navigation, route }) {
     const [isLoading, setLoading] = useState(false);
@@ -53,20 +14,21 @@ export function AddExercise({ navigation, route }) {
     const userid = route.params.userid;
     const workoutId = route.params.workoutid;
 
-
     const addExercise = async (text) => {
         try {
             setLoading(true);
-            console.log(route.params.userid)
+
             const documentData = {
                 exe_date: Timestamp.fromDate(new Date()),
                 exe_name: text,
                 exe_max_reps: 0,
                 exe_max_weight: 0,
-                exe_usr_id: route.params.userid
+                exe_usr_id: userid
             };
             const docRef = await addDoc(collection(db, "Exercise"), documentData);
-            //console.log(await docRef.getDoc().data());
+            if (workoutId !== null) {
+                await attachToWorkout(docRef.id, workoutId);
+            }
         }
         catch (error) {
             console.log(error);
@@ -80,21 +42,16 @@ export function AddExercise({ navigation, route }) {
         }
     }
 
-    const addWorkoutExercise = async (exerciseId, workoutId, goBack) => {
+    const attachToWorkout = async (exerciseId, workoutId, goBack) => {
         try {
-            console.log("workoutid " + workoutId)
-            console.log("reponseid " + exerciseId)
-            const workoutResponse = await postWorkoutExercise(exerciseId, workoutId);
+            console.log("Adding exercise to workout: " + workoutId);
+            const docRef = await addDoc(collection(db, 'Workout', workoutId, 'workout_exercise'), {
+                woe_exercise: exerciseId
+            });
         }
         catch (error) {
             console.log(error);
         }
-        setLoading(false);
-        // 0 used as a OK return code.
-        emitter.emit('exerciseEvent', 0)
-        emitter.emit('workoutExerciseEvent', 0);
-        navigation.goBack();
-
     }
 
     // fetch defaults
@@ -170,8 +127,8 @@ export function AddExercise({ navigation, route }) {
                             filteredDataSource.length > 0 ? (
                                 filteredDataSource.map((item, i) => {
                                     return (
-                                        <TouchableOpacity onPress={() => item.exe_name != null ? addExercise(item.exe_name) : addWorkoutExercise(item.id, workoutId)}>
-                                            <Card key={i} containerStyle={{ padding: 15, borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
+                                        <TouchableOpacity key={i} onPress={() => addExercise(item.exe_name)}>
+                                            <Card containerStyle={{ padding: 15, borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
                                                 <Text>{item.exe_name != null ? item.exe_name : item.exe_name}</Text>
                                             </Card>
                                         </TouchableOpacity>
@@ -180,7 +137,7 @@ export function AddExercise({ navigation, route }) {
                                 (
                                     <TouchableOpacity onPress={() => addExercise(search)}>
                                         <Card>
-                                            <Text >Nothing found, add: {search}</Text>
+                                            <Text>Nothing found, add: {search}</Text>
                                         </Card>
                                     </TouchableOpacity>
                                 )
