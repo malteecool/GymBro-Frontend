@@ -44,7 +44,6 @@ export function AddExercise({ navigation, route }) {
 
     const attachToWorkout = async (exerciseId, workoutId, goBack) => {
         try {
-            console.log("Adding exercise to workout: " + workoutId);
             const docRef = await addDoc(collection(db, 'Workout', workoutId, 'workout_exercise'), {
                 woe_exercise: exerciseId
             });
@@ -58,8 +57,6 @@ export function AddExercise({ navigation, route }) {
     useEffect(() => {
         setLoading(true);
         const getAllExercises = async () => {
-
-            console.log("fetching default exercises");
             const collectionRef = collection(db, 'Default_exercises');
             const q = query(collectionRef);
             const docSnap = await getDocs(q);

@@ -1,24 +1,25 @@
 import { db } from '../firebaseConfig';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { updateExerciseDate, updateExerciseMaxWeight } from './ExerciseService';
 
-async function postExercise(id, sets) {
+async function postExercise(exe_id, sets) {
 
     try {
-        console.log(sets);
         const documentData = {
             exh_date: Timestamp.fromDate(new Date()),
-            exh_exe_id: id
+            exh_exe_id: exe_id
         };
         const docRef = await addDoc(collection(db, 'Exercise_history'), documentData);
-        console.log("doc id => " + await docRef.id);
         if (sets.length > 0) {
-            sets.forEach(async (set) => {
-                console.log("adding set:" + set);
+            sets.forEach(async (set,i) => {
                 const setRef = await addDoc(collection(db, 'Exercise_history', docRef.id, 'sets'), {
                     set_reps: set.set_reps,
-                    set_weight: set.set_weight
+                    set_weight: set.set_weight,
+                    set_order: i+1
                 });
             });
+            await updateExerciseDate(exe_id);
+            await updateExerciseMaxWeight(exe_id, Math.max(...sets.map(o => o.set_weight)));
         }
         return true;
     } catch (error) {

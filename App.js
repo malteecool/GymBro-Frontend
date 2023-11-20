@@ -12,7 +12,6 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { AsyncStorage } from 'react-native';
 import * as AuthSession from 'expo-auth-session';
-
 import { ExcerciseScreen } from './components/ExerciseScreen';
 import { WorkoutScreen } from './components/WorkoutScreen';
 import { WorkoutDetails } from './components/WorkoutDetails';

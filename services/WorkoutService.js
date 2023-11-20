@@ -1,17 +1,15 @@
 import { REACT_APP_URL } from '@env';
 import { db } from "../firebaseConfig";
-import { collection, query, getDocs, where, Timestamp, getDoc, doc } from "firebase/firestore";
+import { collection, query, getDocs, where, Timestamp, getDoc, doc, updateDoc } from "firebase/firestore";
 
-async function postWorkoutExercise(exerciseId, workoutId) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-    };
-    const response = await fetch(`${REACT_APP_URL}/Workouts/${workoutId}/addexercise?exerciseId=${exerciseId}`, requestOptions);
-    console.log(REACT_APP_URL);
-    console.log(response.status);
-    const json = await response.json();
-    return json;
+async function updateWorkout(workout, timer) {
+    console.log(workout);
+    const docRef = updateDoc(doc(db, 'Workout', workout.id), {
+        wor_completed_count: workout.wor_completed_count + 1,
+        wor_estimate_time: timer,
+        wor_last_done: Timestamp.fromDate(new Date())
+    });
+    return docRef;
 }
 
 async function getWorkoutExercises(workoutId) {
@@ -31,8 +29,16 @@ async function getWorkoutExercises(workoutId) {
     return documentData;
 }
 
+const getFormattedTime = (time) => {
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = Math.floor((time % 60));
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+}
+
 
 module.exports = {
-    postWorkoutExercise: postWorkoutExercise,
-    getWorkoutExercises: getWorkoutExercises
+    updateWorkout: updateWorkout,
+    getWorkoutExercises: getWorkoutExercises,
+    getFormattedTime: getFormattedTime
 };
