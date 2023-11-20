@@ -15,6 +15,7 @@ export function ExcerciseScreen({ navigation, route }) {
         try {
             setLoading(true);
             const exercises = await getExercises(user.usr_token);
+            
             setData(exercises);
         }
         catch (error) {
@@ -69,7 +70,7 @@ export function ExcerciseScreen({ navigation, route }) {
                         var ExerciseDate = getFirebaseTimeStamp(item.exe_date.seconds, item.exe_date.nanoseconds);
 
                         return (
-                            <TouchableOpacity key={item.exe_name} onPress={() => { navigation.navigate('exerciseDetails', { exercise: item }) }}>
+                            <TouchableOpacity key={i} onPress={() => { navigation.navigate('exerciseDetails', { exercise: item }) }}>
                                 <Card containerStyle={{ borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
                                     <View style={{ flexDirection: 'row' }}>
                                         <Card.Title>{item.exe_name}</Card.Title>

@@ -1,12 +1,11 @@
 import { db } from "../firebaseConfig";
-import { collection, query, getDocs, where, Timestamp, deleteDoc, doc } from "firebase/firestore";
+import { collection, query, getDocs, where, Timestamp, deleteDoc, doc, updateDoc, getDoc} from "firebase/firestore";
 
 
 async function getExercises(usr_token) {
     console.log("fetching exercises");
     var documentData = [];
     try {
-        console.log("user => " + usr_token);
         const collectionRef = collection(db, 'Exercise');
         const q = query(collectionRef, where("exe_usr_id", "==", usr_token));
         const docSnap = await getDocs(q);
@@ -15,6 +14,9 @@ async function getExercises(usr_token) {
             var exerciseDoc = { "id": doc.id, ...doc.data() };
             documentData.push(exerciseDoc);
         }
+
+        documentData.sort((a,b) => a.exe_date <= b.exe_date);
+
     }
     catch (error) {
         console.error(error)
@@ -29,6 +31,8 @@ async function getSetDocument(docId) {
     docSnap.forEach(async (doc) => {
         documentData.push(doc.data());
     });
+
+    documentData.sort((a,b) => a.set_order >= b.set_order);
     return { "exh_sets": documentData };
 };
 
@@ -44,6 +48,7 @@ async function getHistory(exerciseId) {
                 tempDoc = { exh_date: doc.data().exh_date, ...tempDoc };
                 documentData.push(tempDoc);
             }
+            documentData.sort((a, b) => a.exh_date <= b.exh_date);
         }
     }
     catch (error) {
@@ -66,6 +71,22 @@ async function removeExercise(exe_id, usr_id) {
     }
     catch (error) {
         console.error(error)
+    }
+}
+
+async function updateExerciseDate(exe_id) {
+    const date = new Date();
+    updateDoc(doc(db, 'Exercise', exe_id), {
+        exe_date: new Timestamp.fromDate(new Date())
+    })
+}
+
+async function updateExerciseMaxWeight(exe_id, weight) {
+    const docSnap = await getDoc(doc(db, 'Exercise', exe_id));
+    if (weight > docSnap.data().exe_max_weight) {
+        updateDoc(doc(db, 'Exercise', exe_id), {
+            exe_max_weight: weight
+        });
     }
 }
 
@@ -103,5 +124,7 @@ module.exports = {
     getExercises: getExercises,
     removeExercise: removeExercise,
     getFirebaseTimeStamp: getFirebaseTimeStamp,
-    removeWorkoutExercise: removeWorkoutExercise
+    removeWorkoutExercise: removeWorkoutExercise,
+    updateExerciseDate: updateExerciseDate,
+    updateExerciseMaxWeight: updateExerciseMaxWeight
 };

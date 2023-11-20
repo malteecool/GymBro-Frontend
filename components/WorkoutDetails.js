@@ -6,32 +6,10 @@ import { Card } from "react-native-elements";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import emitter from "./customEventEmitter";
 import { REACT_APP_URL } from '@env';
-
 import { removeWorkoutExercise as removeWorkoutExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService';
-import { getWorkoutExercises } from '../services/WorkoutService';
+import { getWorkoutExercises, updateWorkout, getFormattedTime } from '../services/WorkoutService';
 
 // https://www.reactnativeschool.com/build-a-stop-watch-hook-that-works-even-when-the-app-is-quit
-
-const updateWorkout = async (workoutid) => {
-    console.log("post workout");
-
-    const requestOptions = {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            wor_name: null,
-            wor_last_done: new Date(),
-            wor_completed_count: 0,
-            wor_workout_exercises: null
-        })
-    };
-    const response = await fetch(REACT_APP_URL + '/Workouts/' + workoutid, requestOptions);
-
-    console.log(REACT_APP_URL);
-    const json = await response.json();
-    return json;
-
-}
 
 export function WorkoutDetails({ navigation, route }) {
 
@@ -40,6 +18,9 @@ export function WorkoutDetails({ navigation, route }) {
     const [currentTime, setCurrentTime] = useState(0);
     const [data, setData] = useState([]);
     const [time, setTime] = useState(0);
+    const [startTime, setStartTime] = useState(0);
+    const [intervalTime, setIntervalTime] = useState(0);
+    //let startTime = null;
 
     const workout = route.params.workout;
 
@@ -62,7 +43,7 @@ export function WorkoutDetails({ navigation, route }) {
     const saveWorkout = async () => {
         try {
             setLoading(true);
-            const responseJson = updateWorkout(workout.id);
+            const responseJson = await updateWorkout(workout, time);
             console.log(responseJson);
         }
         catch (error) {
@@ -79,7 +60,7 @@ export function WorkoutDetails({ navigation, route }) {
         try {
             setLoading(true);
             await removeWorkoutExerciseService(workout.id, exe_id, null);
-        } 
+        }
         catch (error) {
             console.log(error);
         }
@@ -101,28 +82,29 @@ export function WorkoutDetails({ navigation, route }) {
 
     }, []);
 
-    const hours = Math.floor(time / 3600);
-
-    // Minutes calculation
-    const minutes = Math.floor((time / 100 % 3600) / 60);
-
-    // Seconds calculation
-    const seconds = time % 60;
-
     useEffect(() => {
         let intervalId;
         if (running) {
             intervalId = setInterval(() => {
-                setTime(time + 1)
+                if (startTime != null) {
+                    setTime(Math.floor(intervalTime + (new Date().getTime() - startTime.getTime()) / 1000));
+                }
             }, 1000);
         }
         navigation.setOptions({
-            title: `${workout.wor_name}: ${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+            title: `${workout.wor_name}: ${getFormattedTime(time)}`
         });
+
         return () => clearInterval(intervalId);
     }, [running, time]);
 
     const startAndStop = () => {
+        if (startTime != null) {
+            setStartTime(new Date());
+        }
+        if (running) {
+            setIntervalTime(time);
+        }
         setRunning(!running);
     };
     // https://aloukissas.medium.com/how-to-build-a-background-timer-in-expo-react-native-without-ejecting-ea7d67478408
