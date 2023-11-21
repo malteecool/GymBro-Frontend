@@ -37,7 +37,9 @@ export function AddExercise({ navigation, route }) {
             setLoading(false);
             // 0 used as a OK return code.
             emitter.emit('exerciseEvent', 0)
-            emitter.emit('workoutExerciseEvent', 0);
+            if (workoutId != null) {
+                emitter.emit('workoutExerciseEvent', 0);
+            }
             navigation.goBack();
         }
     }
