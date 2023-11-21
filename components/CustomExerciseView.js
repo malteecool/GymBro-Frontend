@@ -9,13 +9,13 @@ export function CustomExerciseView({ userid, childToParent }) {
     const [selectedExercises, setSelectedExercises] = useState([]);
 
     useEffect(() => {
-        async function asyncEffect() {
+        const getAvailableExericses = async () => {
             setLoading(true);
             setData(await getExercises(userid));
             console.log(data);
             setLoading(false);
         }
-        asyncEffect();
+        getAvailableExericses();
     }, []);
 
     // introduces alot of rerenders on the view but fixes the problem with not all elements in the array gets passed to the parent.
@@ -49,7 +49,7 @@ export function CustomExerciseView({ userid, childToParent }) {
                                         <TouchableOpacity onPress={() => { addSelectedExercise(item.id) }}>
                                             <Card key={i} containerStyle={[{ padding: 15, borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 },
                                             selectedExercises.includes(item.id) ? selectedStyle.active : selectedStyle.inactive]}>
-                                                <Text>{item.exe_Name}</Text>
+                                                <Text>{item.exe_name}</Text>
                                             </Card>
                                         </TouchableOpacity>
                                     </View>)

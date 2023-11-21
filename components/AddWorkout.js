@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { View, TextInput, ScrollView, Text, ActivityIndicator, TouchableOpacity, StyleSheet } from "react-native";
-import emitter from "./customEventEmitter";
 import { Button, Card } from "react-native-elements";
-import { REACT_APP_URL } from '@env'
 import { TabView, TabBar } from 'react-native-tab-view';
 import CustomExerciseView from "./CustomExerciseView";
-import { postWorkoutExercise } from '../services/WorkoutService';
+import emitter from "./customEventEmitter";
+import { postWorkoutExercise, addWorkout, addWorkoutWithExercises, getDefaultWorkouts } from '../services/WorkoutService';
+import { db } from '../firebaseConfig';
+import { collection, addDoc, query, getDocs, Timestamp } from 'firebase/firestore';
 
 export function AddWorkout({ navigation, route }) {
     const [isLoading, setLoading] = useState(false);
@@ -20,83 +21,44 @@ export function AddWorkout({ navigation, route }) {
     const workoutNameArray = ['Chest', 'Legs', 'Back'];
     const [selectedExercises, setSelectedExercises] = useState([]);
 
-    const addWorkout = async (name, estimate) => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wor_name: name, wor_last_done: new Date(), wor_completed_count: 0, Wor_estimate_time: estimate, wor_usr_id: userid, wor_workout_exercises: null })
-        };
-
-        try {
-            setLoading(true);
-            console.log(REACT_APP_URL);
-            const response = await fetch(REACT_APP_URL + '/Workouts', requestOptions);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const json = await response.json();
-            setLoading(false);
-            emitter.emit('workoutEvent', 0);
-            navigation.goBack();
-        } catch (error) {
-            throw new Error(`Error fetching data: ${error.message}`);
-        }
-    }
-
     const childToParent = (childData) => {
         setSelectedExercises(childData);
         console.log(selectedExercises);
     }
 
-    const addWorkoutWithExercises = async () => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ wor_name: workoutName, wor_last_done: new Date(), wor_completed_count: 0, Wor_estimate_time: workoutTimeEstimate, wor_usr_id: userid, wor_workout_exercises: null })
-        };
+    useEffect(() => {
+        setLoading(true);
+        const getDefaultWorkoutsAsync = async () => {
+            const docDataArray = await getDefaultWorkouts();
+            setFilteredDataSource(docDataArray);
+            setMasterDataSource(docDataArray);
+            setLoading(false);
+        }
+        getDefaultWorkoutsAsync();
+    }, []);
+
+    const onAddWorkout = async (name) => {
+
+        setLoading(true);
         try {
-            setLoading(true);
-            console.log(REACT_APP_URL);
-            const response = await fetch(REACT_APP_URL + '/Workouts', requestOptions);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const json = await response.json();
-            console.log(json.id);
-            const workoutId = json.id;
-            console.log(selectedExercises)
-            for (var i = 0; i < selectedExercises.length; i++) {
-                // currently defaulting to 0 so cannot be added due to db constraint.
-                console.log("adding exercise " + selectedExercises[i]);
-                const responseJson = await postWorkoutExercise(selectedExercises[i], workoutId);
-                console.log(responseJson);
-            }
+            await addWorkout(name, userid);
+        }
+        catch (error) {
+            console.log(error);
+        }
+        finally {
+            setLoading(false);
+            // 0 used as a OK return code.
             emitter.emit('workoutEvent', 0);
             navigation.goBack();
-        } catch (error) {
-            console.log(`Error fetching data: ${error.message}`);
         }
     }
 
-    useEffect(() => {
-        console.log(REACT_APP_URL);
+    const onAddWorkoutWithExercises = async (name) => {
         setLoading(true);
-
-        const nameIndex = Math.floor(Math.random() * 3);
-        setWorkoutNameExample(workoutNameArray[nameIndex]);
-
-        fetch(REACT_APP_URL + '/Defaults?type=workout&id=' + userid)
-
-            .then((response) => response.json())
-            .then((responseJson) => {
-                setFilteredDataSource(responseJson);
-                setMasterDataSource(responseJson);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }, []);
+        await addWorkoutWithExercises(name, selectedExercises);
+        setLoading(false);
+    }
 
     const searchFilterFunction = (text) => {
         // Check if searched text is not blank
@@ -106,8 +68,8 @@ export function AddWorkout({ navigation, route }) {
             const newData = masterDataSource.filter(
                 function (item) {
                     // Applying filter for the inserted text in search bar
-                    const itemData = item.def_value
-                        ? item.def_value.toUpperCase()
+                    const itemData = item.def_name
+                        ? item.def_name.toUpperCase()
                         : ''.toUpperCase();
                     const textData = text.toUpperCase();
                     return itemData.indexOf(textData) > -1;
@@ -161,9 +123,9 @@ export function AddWorkout({ navigation, route }) {
                                         filteredDataSource.length > 0 ? (
                                             filteredDataSource.map((item, i) => {
                                                 return (
-                                                    <TouchableOpacity onPress={() => addWorkout(item.def_value, 0)}>
+                                                    <TouchableOpacity onPress={() => onAddWorkout(item.def_name)}>
                                                         <Card key={i} containerStyle={{ padding: 15, borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
-                                                            <Text>{item.def_value}</Text>
+                                                            <Text>{item.def_name}</Text>
                                                         </Card>
                                                     </TouchableOpacity>
                                                 )
@@ -224,7 +186,7 @@ export function AddWorkout({ navigation, route }) {
                             </View>
                         </View>
                         <View style={{ position: 'absolute', width: '100%', bottom: 10 }}>
-                            <Button disabled={workoutName.length <= 0} title='Create' buttonStyle={{ margin: 10 }} onPress={() => { addWorkoutWithExercises() }} />
+                            <Button disabled={workoutName.length <= 0} title='Create' buttonStyle={{ margin: 10 }} onPress={() => { onAddWorkoutWithExercises(workoutName) }} />
                         </View>
                     </View>
                 );

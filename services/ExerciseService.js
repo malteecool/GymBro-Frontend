@@ -4,6 +4,7 @@ import { collection, query, getDocs, where, Timestamp, deleteDoc, doc, updateDoc
 
 async function getExercises(usr_token) {
     console.log("fetching exercises");
+    console.log("User token => " + usr_token);
     var documentData = [];
     try {
         const collectionRef = collection(db, 'Exercise');
