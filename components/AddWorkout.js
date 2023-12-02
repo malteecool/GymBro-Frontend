@@ -41,7 +41,11 @@ export function AddWorkout({ navigation, route }) {
 
         setLoading(true);
         try {
-            await addWorkout(name, userid);
+            if (selectedExercises.length > 0) {
+                await addWorkoutWithExercises(name, selectedExercises, userid);
+            } else {
+                await addWorkout(name, userid);
+            }
         }
         catch (error) {
             console.log(error);
@@ -56,7 +60,7 @@ export function AddWorkout({ navigation, route }) {
 
     const onAddWorkoutWithExercises = async (name) => {
         setLoading(true);
-        await addWorkoutWithExercises(name, selectedExercises);
+
         setLoading(false);
     }
 
@@ -131,7 +135,7 @@ export function AddWorkout({ navigation, route }) {
                                                 )
                                             })) :
                                             (
-                                                <TouchableOpacity onPress={() => addWorkout(search, 0)}>
+                                                <TouchableOpacity onPress={() => onAddWorkout(search, 0)}>
                                                     <Card>
                                                         <Text>Nothing found, add: {search}</Text>
                                                     </Card>
@@ -155,6 +159,7 @@ export function AddWorkout({ navigation, route }) {
                             padding: 5,
                             margin: 5,
                             borderRadius: 6,
+                            backgroundColor:'#D8DBE2'
                         }, nameFocus ? responsiveTextStyle.focused : responsiveTextStyle.unfocused]}
                             placeholder={workoutNameExample}
                             value={workoutName}
@@ -169,7 +174,7 @@ export function AddWorkout({ navigation, route }) {
                                 padding: 5,
                                 margin: 5,
                                 borderRadius: 6,
-                                backgroundColor: '#edeaea',
+                                backgroundColor: '#D8DBE2',
                             }, estimateFocus ? responsiveTextStyle.focused : responsiveTextStyle.unfocused]}
                                 keyboardType='numeric'
                                 placeholder='0'
@@ -181,12 +186,12 @@ export function AddWorkout({ navigation, route }) {
 
                         <View style={{ flex: 1 }}>
                             <Text style={{ margin: 5, fontSize: 16 }}>My exercises</Text>
-                            <View style={{ flex: 1, backgroundColor: '#edeaea' }}>
+                            <View style={{ flex: 1, backgroundColor: '#edeaea'}}>
                                 <CustomExerciseView userid={userid} childToParent={childToParent} />
                             </View>
                         </View>
                         <View style={{ position: 'absolute', width: '100%', bottom: 10 }}>
-                            <Button disabled={workoutName.length <= 0} title='Create' buttonStyle={{ margin: 10 }} onPress={() => { onAddWorkoutWithExercises(workoutName) }} />
+                            <Button disabled={workoutName.length <= 0} title='Create' buttonStyle={{ margin: 10 }} onPress={() => { onAddWorkout(workoutName) }} />
                         </View>
                     </View>
                 );

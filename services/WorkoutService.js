@@ -86,28 +86,19 @@ const getFormattedTime = (time) => {
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
 }
 
-async function addWorkoutWithExercises(workoutName, selectedExercises) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wor_name: workoutName, wor_last_done: new Date(), wor_completed_count: 0, Wor_estimate_time: workoutTimeEstimate, wor_usr_id: userid, wor_workout_exercises: null })
-    };
+async function addWorkoutWithExercises(workoutName, selectedExercises, usrToken) {
+    
     try {
-        console.log(REACT_APP_URL);
-        const response = await fetch(REACT_APP_URL + '/Workouts', requestOptions);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        console.log(usrToken);
+        const workout = await addWorkout(workoutName, usrToken);
+
+        for (const exericseId of selectedExercises) {
+            const docRef = await addDoc(collection(db, 'Workout', workout.id, 'workout_exercise'), {
+                woe_exercise: exericseId
+            });
         }
-        const json = await response.json();
-        console.log(json.id);
-        const workoutId = json.id;
-        console.log(selectedExercises)
-        for (var i = 0; i < selectedExercises.length; i++) {
-            // currently defaulting to 0 so cannot be added due to db constraint.
-            console.log("adding exercise " + selectedExercises[i]);
-            const responseJson = await postWorkoutExercise(selectedExercises[i], workoutId);
-            console.log(responseJson);
-        }
+
+        
         emitter.emit('workoutEvent', 0);
         navigation.goBack();
     } catch (error) {
@@ -115,14 +106,14 @@ async function addWorkoutWithExercises(workoutName, selectedExercises) {
     }
 }
 
-async function addWorkout(name, usr_token) {
+async function addWorkout(name, usrToken) {
     try {
         const documentData = {
             wor_completed_count: 0,
             wor_estimate_time: 0,
             wor_last_done: Timestamp.fromDate(new Date()),
             wor_name: name,
-            wor_usr_id: usr_token
+            wor_usr_id: usrToken
         };
         const docRef = await addDoc(collection(db, "Workout"), documentData);
     }

@@ -25,11 +25,11 @@ const Stack = createNativeStackNavigator();
 
 function ExerciseStackScreen(userInfo) {
     return (
-        <Stack.Navigator >
+        <Stack.Navigator>
             <Stack.Screen name='excercises'
                 component={ExcerciseScreen}
                 initialParams={{ userInfo: userInfo }}
-                options={{ headerShown: false }} />
+                options={{ headerShown: false}} />
             <Stack.Screen name='exerciseDetails' component={ExerciseDetails} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
             <Stack.Screen name='addExercise' component={AddExercise} options={({ route }) => ({ title: 'New exercise' })} />
             <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
@@ -142,7 +142,7 @@ export default function App() {
             setLoading(false);
         }
     };
-
+    
     return (
         <NavigationContainer>{
             isLoading ? (
@@ -151,7 +151,10 @@ export default function App() {
                     <Text>Logging in...</Text>
                 </View>
             ) : ((auth && userInfo) ? (
-                <Tab.Navigator>
+                <Tab.Navigator
+                activeColor='#000'
+                inactiveColor='#fff'
+                barStyle={{backgroundColor: '#2289dc'}}>
                     <Tab.Screen name='exerciseStack'
                         children={() => <ExerciseStackScreen user={userInfo} />}
                         options={{
