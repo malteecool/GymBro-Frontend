@@ -159,7 +159,7 @@ export function AddWorkout({ navigation, route }) {
                             padding: 5,
                             margin: 5,
                             borderRadius: 6,
-                            backgroundColor:'#D8DBE2'
+                            backgroundColor:'#fff'
                         }, nameFocus ? responsiveTextStyle.focused : responsiveTextStyle.unfocused]}
                             placeholder={workoutNameExample}
                             value={workoutName}
@@ -174,7 +174,7 @@ export function AddWorkout({ navigation, route }) {
                                 padding: 5,
                                 margin: 5,
                                 borderRadius: 6,
-                                backgroundColor: '#D8DBE2',
+                                backgroundColor: '#fff',
                             }, estimateFocus ? responsiveTextStyle.focused : responsiveTextStyle.unfocused]}
                                 keyboardType='numeric'
                                 placeholder='0'
