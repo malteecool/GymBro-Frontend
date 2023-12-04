@@ -42,7 +42,7 @@ export function CustomExerciseView({ userid, childToParent }) {
             {
                 isLoading ? <ActivityIndicator /> :
                     (
-                        <ScrollView contentContainerStyle={{paddingBottom: 75, backgroundColor: '#D8DBE2', borderTopLeftRadius: 6, borderTopRightRadius: 6}}>
+                        <ScrollView contentContainerStyle={{paddingBottom: 75, backgroundColor: '#f5f5f5', borderTopLeftRadius: 6, borderTopRightRadius: 6}}>
                             {
                                 data.map((item, i) => {
                                     return (<View>
