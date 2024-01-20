@@ -1,4 +1,5 @@
-import { db } from "../firebaseConfig";
+import { ref, getBytes, getBlob, getStream } from "firebase/storage";
+import { db, storage } from "../firebaseConfig";
 import { collection, addDoc, query, getDocs, where } from "firebase/firestore";
 
 function getClientId() {
@@ -12,9 +13,9 @@ function getClientId() {
     return null;
 }
 
-async function userExist(token) {
+async function userExist(id) {
     const collectionRef = collection(db, 'User');
-    const q = query(collectionRef, where("usr_token", "==", token));
+    const q = query(collectionRef, where("usr_token", "==", id));
     const docSnap = await getDocs(q);
 
     //return first user found.
@@ -64,5 +65,5 @@ module.exports = {
     userExist: userExist,
     getUserData: getUserData,
     addUser: addUser,
-    logout: logout
+    logout: logout,
 }

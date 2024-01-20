@@ -1,6 +1,5 @@
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Button } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import emitter from './customEventEmitter'
@@ -16,7 +15,7 @@ export function WorkoutScreen({ navigation, route }) {
         console.log("fetching workouts");
         try {
             setLoading(true);
-            const workouts = await getWorkouts(user.usr_token);
+            const workouts = await getWorkouts(user.id);
             setData(workouts);
         }
         catch (error) {
@@ -32,7 +31,6 @@ export function WorkoutScreen({ navigation, route }) {
 
     React.useEffect(() => {
         const listener = (data) => {
-            console.log("event recieved");
             load();
         };
         emitter.on('workoutEvent', listener);
@@ -107,7 +105,7 @@ export function WorkoutScreen({ navigation, route }) {
                 bottom: 10,
                 right: 10,
             }}>
-                <Button onPress={() => { navigation.navigate('addWorkout', { userid: user.usr_token }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7' }} />
+                <Button onPress={() => { navigation.navigate('addWorkout', { userid: user.id }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7' }} />
             </TouchableOpacity>
         </View>
     )

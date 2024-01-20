@@ -4,6 +4,7 @@ import { Button, Card, CheckBox } from "react-native-elements";
 import emitter from "./customEventEmitter";
 import { db } from '../firebaseConfig';
 import { collection, addDoc, query, getDocs, Timestamp } from 'firebase/firestore';
+import { getDefaultExercises, getExercises } from '../services/ExerciseService';
 
 export function AddExercise({ navigation, route }) {
     const [isLoading, setLoading] = useState(false);
@@ -59,14 +60,12 @@ export function AddExercise({ navigation, route }) {
     useEffect(() => {
         setLoading(true);
         const getAllExercises = async () => {
-            const collectionRef = collection(db, 'Default_exercises');
-            const q = query(collectionRef);
-            const docSnap = await getDocs(q);
-            const docDataArray = [];
-            await docSnap.forEach(async (doc) => {
-                const docData = await doc.data();
-                docDataArray.push(docData);
-            });
+            var docDataArray;
+            if (workoutId != null) {
+                docDataArray = await getExercises(userid);
+            } else {
+                docDataArray = await getDefaultExercises();
+            }
             setFilteredDataSource(docDataArray);
             setMasterDataSource(docDataArray);
             setLoading(false);

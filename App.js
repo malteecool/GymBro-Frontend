@@ -15,6 +15,7 @@ import * as AuthSession from 'expo-auth-session';
 import { ExcerciseScreen } from './components/ExerciseScreen';
 import { WorkoutScreen } from './components/WorkoutScreen';
 import { WorkoutDetails } from './components/WorkoutDetails';
+import { ProfileScreen } from './components/ProfileScreen';
 import emitter from "./components/customEventEmitter";
 import { AddWorkout } from './components/AddWorkout';
 import { getClientId, userExist, getUserData, addUser, logout } from './services/UserService';
@@ -29,7 +30,7 @@ function ExerciseStackScreen(userInfo) {
             <Stack.Screen name='excercises'
                 component={ExcerciseScreen}
                 initialParams={{ userInfo: userInfo }}
-                options={{ headerShown: false}} />
+                options={{ headerShown: false }} />
             <Stack.Screen name='exerciseDetails' component={ExerciseDetails} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
             <Stack.Screen name='addExercise' component={AddExercise} options={({ route }) => ({ title: 'New exercise' })} />
             <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
@@ -50,19 +51,28 @@ function WorkoutStackScreen(userInfo) {
     )
 }
 
+function ProfileStackScreen(userInfo) {
+    return (
+        <Stack.Navigator>
+            <Stack.Screen name='profile' component={ProfileScreen} initialParams={{ userInfo: userInfo }} options={{ headerShown: false }} />
+        </Stack.Navigator>
+    )
+}
+
 const Tab = createMaterialBottomTabNavigator();
 
 
 const updateExercisesEmitter = () => {
-    console.log("event emitted");
-    emitter.emit('exerciseEvent', 0)
+    emitter.emit('exerciseEvent', 0);
 }
 
 const updateWorkoutEmitter = () => {
-    console.log("workout event emitted");
-    emitter.emit('workoutEvent', 0)
+    emitter.emit('workoutEvent', 0);
 }
 
+const updateProfileEmitter = () => {
+    emitter.emit('profileEvent', 0);
+}
 
 // handles login
 export default function App() {
@@ -107,12 +117,11 @@ export default function App() {
                 const userData = await getUserData(authFromJson);
                 if (userData.id) {
                     const dbUser = await userExist(userData.id);
-                    if (dbUser != null) {
-                        setUserInfo(dbUser);
-                    } else {
+                    if (dbUser == null) {
+                        // could probably be removed, not needed.
                         const newUser = await addUser(userData);
-                        setUserInfo(newUser);
                     }
+                    setUserInfo(userData);
                 } else if (userData.error?.code == 401) {
                     console.log("refreshing token")
                     const clientId = getClientId();
@@ -142,7 +151,7 @@ export default function App() {
             setLoading(false);
         }
     };
-    
+
     return (
         <NavigationContainer>{
             isLoading ? (
@@ -152,9 +161,9 @@ export default function App() {
                 </View>
             ) : ((auth && userInfo) ? (
                 <Tab.Navigator
-                activeColor='#000'
-                inactiveColor='#fff'
-                barStyle={{backgroundColor: '#2289dc'}}>
+                    activeColor='#000'
+                    inactiveColor='#fff'
+                    barStyle={{ backgroundColor: '#2289dc' }}>
                     <Tab.Screen name='exerciseStack'
                         children={() => <ExerciseStackScreen user={userInfo} />}
                         options={{
@@ -171,6 +180,13 @@ export default function App() {
                             tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='weight-lifter' color={color} size={26} />)
                         }}
                         listeners={{ tabPress: () => { updateWorkoutEmitter() } }} />
+                    <Tab.Screen name='profileStack'
+                        children={() => <ProfileStackScreen user={userInfo} />}
+                        options={{
+                            tabBarLabel: 'Profile',
+                            tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='account' color={color} size={26} />)
+                        }}
+                        listeners={{ tabPress: () => { updateProfileEmitter() } }} />
                 </Tab.Navigator>
 
             ) : (
