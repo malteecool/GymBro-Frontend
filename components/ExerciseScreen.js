@@ -1,22 +1,27 @@
-import { Text, View, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { Text, View, ActivityIndicator, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Card, Button } from 'react-native-elements';
 import emitter from './customEventEmitter';
-import { getExercises, removeExercise as removeExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService'; 
+import { getExercises, removeExercise as removeExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService';
 
 export function ExcerciseScreen({ navigation, route }) {
     const [isLoading, setLoading] = useState(true);
     const [data, setData] = useState([]);
+    const [search, setSearch] = useState('');
+    const [filteredDataSource, setFilteredDataSource] = useState([]);
+    const [masterDataSource, setMasterDataSource] = useState([]);
 
     const user = route.params.userInfo.user;
     // fetch exercises
     const load = async () => {
         try {
             setLoading(true);
-            const exercises = await getExercises(user.usr_token);
-            
+            const exercises = await getExercises(user.id);
+
             setData(exercises);
+            setFilteredDataSource(exercises);
+            setMasterDataSource(exercises);
         }
         catch (error) {
             console.error(error)
@@ -32,7 +37,7 @@ export function ExcerciseScreen({ navigation, route }) {
 
     const removeExercise = async (exe_id) => {
         try {
-            await removeExerciseService(exe_id, user.usr_token);
+            await removeExerciseService(exe_id, user.id);
         }
         catch (error) {
             console.error(error)
@@ -42,9 +47,34 @@ export function ExcerciseScreen({ navigation, route }) {
         }
     };
 
+    const searchFilterFunction = (text) => {
+        // Check if searched text is not blank
+        if (text) {
+            // Inserted text is not blank
+            // Filter the masterDataSource and update FilteredDataSource
+            const newData = masterDataSource.filter(
+                function (item) {
+                    // Applying filter for the inserted text in search bar
+                    var itemData = '';
+                    if (item.exe_name != null) {
+                        itemData = item.exe_name ? item.exe_name.toUpperCase() : ''.toUpperCase();
+                    }
+                    const textData = text.toUpperCase();
+                    return itemData.indexOf(textData) > -1;
+                }
+            );
+            setFilteredDataSource(newData);
+            setSearch(text);
+        } else {
+            // Inserted text is blank
+            // Update FilteredDataSource with masterDataSource
+            setFilteredDataSource(masterDataSource);
+            setSearch(text);
+        }
+    };
+
     React.useEffect(() => {
         const listener = (data) => {
-            console.log("event recieved");
             load();
         };
         emitter.on('exerciseEvent', listener);
@@ -57,6 +87,19 @@ export function ExcerciseScreen({ navigation, route }) {
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: '100%', flexWrap: 'wrap', flexDirection: 'row', justifyContent: 'center', alignContent: 'center'}}>
+                <TextInput onChangeText={(text) => searchFilterFunction(text)} style={{
+                    height: 40,
+                    borderBottomWidth: 1,
+                    padding: 5,
+                    margin: 5,
+                    borderRadius: 6,
+                    flexBasis: '85%',
+                    alignSelf: 'flex-start'
+                }}
+                    placeholder='Search'
+                />
+            </View>
             {isLoading ? (
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                     <ActivityIndicator />
@@ -65,7 +108,7 @@ export function ExcerciseScreen({ navigation, route }) {
             ) : (
                 <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 20 }}>{
 
-                    data.map((item, i) => {
+                    filteredDataSource.map((item, i) => {
 
                         var ExerciseDate = getFirebaseTimeStamp(item.exe_date.seconds, item.exe_date.nanoseconds);
 
@@ -97,7 +140,7 @@ export function ExcerciseScreen({ navigation, route }) {
                 bottom: 10,
                 right: 10,
             }}>
-                <Button onPress={() => { navigation.navigate('addExercise', { userid: user.usr_token, workoutid: null }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7' }} />
+                <Button onPress={() => { navigation.navigate('addExercise', { userid: user.id, workoutid: null }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7' }} />
             </TouchableOpacity>
         </View>
     )

@@ -159,7 +159,7 @@ export function AddWorkout({ navigation, route }) {
                             padding: 5,
                             margin: 5,
                             borderRadius: 6,
-                            backgroundColor:'#fff'
+                            backgroundColor: '#fff'
                         }, nameFocus ? responsiveTextStyle.focused : responsiveTextStyle.unfocused]}
                             placeholder={workoutNameExample}
                             value={workoutName}
@@ -175,7 +175,8 @@ export function AddWorkout({ navigation, route }) {
                                 margin: 5,
                                 borderRadius: 6,
                                 backgroundColor: '#fff',
-                            }, estimateFocus ? responsiveTextStyle.focused : responsiveTextStyle.unfocused]}
+                                },
+                                estimateFocus ? responsiveTextStyle.focused : responsiveTextStyle.unfocused]}
                                 keyboardType='numeric'
                                 placeholder='0'
                                 value={workoutTimeEstimate}
@@ -186,7 +187,7 @@ export function AddWorkout({ navigation, route }) {
 
                         <View style={{ flex: 1 }}>
                             <Text style={{ margin: 5, fontSize: 16 }}>My exercises</Text>
-                            <View style={{ flex: 1, backgroundColor: '#edeaea'}}>
+                            <View style={{ flex: 1, backgroundColor: '#edeaea' }}>
                                 <CustomExerciseView userid={userid} childToParent={childToParent} />
                             </View>
                         </View>

@@ -31,7 +31,6 @@ export function ExerciseDetails({ navigation, route }) {
 
     React.useEffect(() => {
         const listener = (data) => {
-            console.log("event recieved");
             load();
         };
         emitter.on('setEvent', listener);
@@ -49,6 +48,7 @@ export function ExerciseDetails({ navigation, route }) {
                     <ActivityIndicator />
                 </View>
             ) : (<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                
                 {!isEmpty ? (
                     <ScrollView style={{ width: '100%' }}>{
                         data.map((exercise, i) => (

@@ -71,7 +71,6 @@ export function WorkoutDetails({ navigation, route }) {
 
     useEffect(() => {
         const listener = (data) => {
-            console.log("workout event recieved");
             load();
         };
         emitter.on('workoutExerciseEvent', listener);

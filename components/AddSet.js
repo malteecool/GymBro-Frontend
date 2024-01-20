@@ -11,7 +11,6 @@ export function AddSet({ navigation, route }) {
     const exercise = route.params.exercise;
     const [isLoading, setLoading] = useState(false);
     const [data, setData] = useState([]);
-    console.log(exercise);
     
     const childToParent = (childData) => {
         setData(childData);
@@ -20,7 +19,7 @@ export function AddSet({ navigation, route }) {
     const onAddHistory = async () => {
         try {
             setLoading(true);
-            await postExercise(exercise.id, data)
+            await postExercise(exercise, data)
         }
         
         catch (error) {

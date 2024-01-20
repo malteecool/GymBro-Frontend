@@ -2,6 +2,8 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from "firebase/storage";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -14,7 +16,7 @@ const firebaseConfig = {
     storageBucket: "gymbroapi.appspot.com",
     messagingSenderId: "101860006838",
     appId: "1:101860006838:web:6ac517d4caf51c70c4bf17",
-    measurementId: "G-31RNCLXTZW"
+    measurementId: "G-31RNCLXTZW",
 };
 
 // Initialize Firebase
@@ -23,7 +25,8 @@ const app = initializeApp(firebaseConfig);
 //const analytics = getAnalytics(app);
 
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-export {db};
+export {db, storage};
 
 
