@@ -1,4 +1,4 @@
-import { Text, View, ActivityIndicator } from 'react-native';
+import { Text, View, ActivityIndicator, StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -18,7 +18,8 @@ import { WorkoutDetails } from './components/WorkoutDetails';
 import { ProfileScreen } from './components/ProfileScreen';
 import emitter from "./components/customEventEmitter";
 import { AddWorkout } from './components/AddWorkout';
-import { getClientId, userExist, getUserData, addUser, logout } from './services/UserService';
+import { userExist, getUserData, addUser, logout } from './services/UserService';
+import Styles from './Styles';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -31,9 +32,25 @@ function ExerciseStackScreen(userInfo) {
                 component={ExcerciseScreen}
                 initialParams={{ userInfo: userInfo }}
                 options={{ headerShown: false }} />
-            <Stack.Screen name='exerciseDetails' component={ExerciseDetails} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
-            <Stack.Screen name='addExercise' component={AddExercise} options={({ route }) => ({ title: 'New exercise' })} />
-            <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
+            <Stack.Screen name='exerciseDetails' component={ExerciseDetails} options={({ route }) => ({
+                title: route.params.exercise.exe_name,
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color
+            })} />
+            <Stack.Screen name='addExercise' component={AddExercise} options={({ route }) => ({
+                title: 'New exercise',
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color
+            })} />
+            <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({
+                title: route.params.exercise.exe_name,
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color,
+
+            })} />
         </Stack.Navigator>
     )
 }
@@ -42,18 +59,43 @@ function WorkoutStackScreen(userInfo) {
     return (
         <Stack.Navigator>
             <Stack.Screen name='workouts' component={WorkoutScreen} initialParams={{ userInfo: userInfo }} options={{ headerShown: false }} />
-            <Stack.Screen name='workoutDetails' component={WorkoutDetails} options={({ route }) => ({ title: route.params.workout.wor_name })} />
-            <Stack.Screen name='exerciseDetailsWorkout' component={ExerciseDetails} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
-            <Stack.Screen name='addExercise' component={AddExercise} options={({ route }) => ({ title: 'New exercise' })} />
-            <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({ title: route.params.exercise.exe_name })} />
-            <Stack.Screen name='addWorkout' component={AddWorkout} options={({ route }) => ({ title: 'New workout' })} />
+            <Stack.Screen name='workoutDetails' component={WorkoutDetails} options={({ route }) => ({
+                title: route.params.workout.wor_name,
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color
+            })} />
+            <Stack.Screen name='exerciseDetailsWorkout' component={ExerciseDetails} options={({ route }) => ({
+                title: route.params.exercise.exe_name,
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color
+            })} />
+            <Stack.Screen name='addExercise' component={AddExercise} options={({ route }) => ({
+                title: 'New exercise',
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color
+            })} />
+            <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({
+                title: route.params.exercise.exe_name,
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color
+            })} />
+            <Stack.Screen name='addWorkout' component={AddWorkout} options={({ route }) => ({
+                title: 'New workout',
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color
+            })} />
         </Stack.Navigator>
     )
 }
 
 function ProfileStackScreen(userInfo) {
     return (
-        <Stack.Navigator>
+        <Stack.Navigator headerMode>
             <Stack.Screen name='profile' component={ProfileScreen} initialParams={{ userInfo: userInfo }} options={{ headerShown: false }} />
         </Stack.Navigator>
     )
@@ -89,7 +131,7 @@ export default function App() {
         if (response?.type === 'success') {
             setAuth(response.authentication);
             setLoading(true);
-            //store user session so he does not need to login every time he enter the app.
+            //store user session so we do not need to login every time we enter the app.
             const persistAuth = async () => {
                 await AsyncStorage.setItem('auth', JSON.stringify(response.authentication));
                 await getPersistedAuth();
@@ -124,8 +166,8 @@ export default function App() {
                     setUserInfo(userData);
                 } else if (userData.error?.code == 401) {
                     console.log("refreshing token")
-                    const clientId = getClientId();
-                    console.log(clientId);
+                    const clientId = process.env.REACT_APP_TOKEN;
+                    console.log(clientId)
                     const tokenResult = await AuthSession.refreshAsync({
                         clientId: clientId,
                         refreshToken: authFromJson.refreshToken
@@ -137,9 +179,8 @@ export default function App() {
                     await AsyncStorage.setItem('auth', JSON.stringify(tokenResult));
                     setRequireRefresh(false);
                     const userData = await getUserData(tokenResult);
-                    const dbUser = await userExist(userData.id);
-                    if (dbUser) {
-                        setUserInfo(dbUser);
+                    if (userData) {
+                        setUserInfo(userData);
                     }
                 }
             } else {
@@ -153,48 +194,64 @@ export default function App() {
     };
 
     return (
-        <NavigationContainer>{
-            isLoading ? (
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                    <ActivityIndicator />
-                    <Text>Logging in...</Text>
-                </View>
-            ) : ((auth && userInfo) ? (
-                <Tab.Navigator
-                    activeColor='#000'
-                    inactiveColor='#fff'
-                    barStyle={{ backgroundColor: '#2289dc' }}>
-                    <Tab.Screen name='exerciseStack'
-                        children={() => <ExerciseStackScreen user={userInfo} />}
-                        options={{
-                            tabBarLabel: 'Excercises',
-                            tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='dumbbell' color={color} size={26} />),
-                            headerShown: false
-                        }}
-                        listeners={{ tabPress: () => { updateExercisesEmitter() } }}
-                    />
-                    <Tab.Screen name='workoutStack'
-                        children={() => <WorkoutStackScreen user={userInfo} />}
-                        options={{
-                            tabBarLabel: 'Workouts',
-                            tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='weight-lifter' color={color} size={26} />)
-                        }}
-                        listeners={{ tabPress: () => { updateWorkoutEmitter() } }} />
-                    <Tab.Screen name='profileStack'
-                        children={() => <ProfileStackScreen user={userInfo} />}
-                        options={{
-                            tabBarLabel: 'Profile',
-                            tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='account' color={color} size={26} />)
-                        }}
-                        listeners={{ tabPress: () => { updateProfileEmitter() } }} />
-                </Tab.Navigator>
+        <View style={{
+            flex: 1,
+            paddingTop: StatusBar.currentHeight || 0,
+            backgroundColor: Styles.lessDark.backgroundColor
+        }}>
+            <StatusBar
+                backgroundColor="transparent"
+                barStyle="dark-content"
+                translucent={true} // Make sure this is set to false
+            >
+            </StatusBar>
+            <NavigationContainer>{
+                isLoading ? (
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <ActivityIndicator />
+                        <Text>Logging in...</Text>
+                    </View>
+                ) : ((auth && userInfo) ? (
+                    <Tab.Navigator
+                        style={{ flex: 1 }}
+                        activeColor='#000'
+                        inactiveColor='#CDCD55'
+                        tabBarLabelStyle={{ color: '#CDCD55' }}
+                        barStyle={Styles.lessDark}>
+                        <Tab.Screen name='profileStack'
+                            children={() => <ProfileStackScreen user={userInfo} />}
+                            options={{
+                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Profile</Text>,
+                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='account' color={color} size={26} />)
+                            }}
+                            listeners={{ tabPress: () => { updateProfileEmitter() } }} />
+                        <Tab.Screen name='exerciseStack'
+                            children={() => <ExerciseStackScreen user={userInfo} />}
+                            options={{
+                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Exercises</Text>,
+                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='dumbbell' color={color} size={26} />),
+                                headerShown: false
+                            }}
+                            listeners={{ tabPress: () => { updateExercisesEmitter() } }}
+                        />
+                        <Tab.Screen name='workoutStack'
+                            children={() => <WorkoutStackScreen user={userInfo} />}
+                            options={{
+                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Workouts</Text>,
+                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='weight-lifter' color={color} size={26} />)
+                            }}
+                            listeners={{ tabPress: () => { updateWorkoutEmitter() } }} />
 
-            ) : (
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ padding: 6 }}>Please sign in to store your workouts!</Text>
-                    <Button title='Login' onPress={() => promptAsync({ useProxy: false, showInRecents: true })}
-                    />
-                </View>
-            ))}</NavigationContainer>
+                    </Tab.Navigator>
+
+                ) : (
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ padding: 6 }}>Please sign in to store your workouts!</Text>
+                        <Button title='Login' onPress={() => promptAsync({ useProxy: false, showInRecents: true })}
+                        />
+                    </View>
+                ))}</NavigationContainer>
+        </View>
+
     );
 }

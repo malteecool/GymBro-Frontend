@@ -28,7 +28,7 @@ const CounterComponent = ({ targetValue }) => {
                 fontSize: 60,
                 textAlign: 'center',
                 fontWeight: 'bold',
-                color: '#3498db',
+                color: '#0C7C59',
             }}>{counter}</Text>
         </View>
     );

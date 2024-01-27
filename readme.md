@@ -12,3 +12,13 @@ APK will be available in Gymbro\android\app\build\outputs\apk\release
 clone
 Cd gymbro
 npx expo run:android (needed for native build)
+
+
+
+
+# Color Theme:
+## dark: #121111
+## less dark: #1c1a1a
+## Yellow: #CDCD55
+## Green: #0C7C59
+

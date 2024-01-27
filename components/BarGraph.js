@@ -41,10 +41,10 @@ const styles = StyleSheet.create({
     barContainer: {
         flex: 1,
         alignItems: 'center',
-        flexDirection: 'column-reverse'
+        flexDirection: 'column-reverse',
     },
     bar: {
-        backgroundColor: '#3498db',
+        backgroundColor: '#0C7C59',
         marginHorizontal: 2,
         width: 50,
         justifyContent: 'flex-end',
@@ -54,11 +54,13 @@ const styles = StyleSheet.create({
     barText: {
         color: 'white',
         marginBottom: 5,
+        fontWeight: 'bold'
     },
     label: {
+        marginTop: 3,
         marginBottom: 5,
-        color: '#2c3e50',
-        fontWeight: 'bold'
+        color: '#CDCD55',
+        fontWeight: 'bold',
     },
 });
 

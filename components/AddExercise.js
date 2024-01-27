@@ -5,6 +5,8 @@ import emitter from "./customEventEmitter";
 import { db } from '../firebaseConfig';
 import { collection, addDoc, query, getDocs, Timestamp } from 'firebase/firestore';
 import { getDefaultExercises, getExercises } from '../services/ExerciseService';
+import Styles from "../Styles";
+
 
 export function AddExercise({ navigation, route }) {
     const [isLoading, setLoading] = useState(false);
@@ -100,21 +102,18 @@ export function AddExercise({ navigation, route }) {
     };
 
     return (
-        <View style={{ flex: 1, alignItems: 'center', }}>
+        <View style={{ flex: 1, alignItems: 'center', backgroundColor: Styles.dark.backgroundColor}}>
 
-            <TextInput onChangeText={(text) => searchFilterFunction(text)} style={{
-                width: '93%',
-                height: 40,
-                borderBottomWidth: 1,
-                padding: 5,
-                margin: 5,
-                borderRadius: 6
-            }}
+            <View style={Styles.searchContainer}>
+                <TextInput
+                    onChangeText={(text) => searchFilterFunction(text)}
+                    style={Styles.searchBar}
+                    placeholder='Search'
+                    placeholderTextColor={Styles.fontColor.color} // Lighter placeholder text color
+                />
+            </View>
 
-                placeholder='Search'
-                value={search} />
-
-            <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' /* using 100% height and width as flex 1 is not working */ }}>
+            <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
                 {isLoading ? (
                     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
                         <ActivityIndicator />
@@ -126,16 +125,16 @@ export function AddExercise({ navigation, route }) {
                                 filteredDataSource.map((item, i) => {
                                     return (
                                         <TouchableOpacity key={i} onPress={() => addExercise(item.exe_name)}>
-                                            <Card containerStyle={{ padding: 15, borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
-                                                <Text>{item.exe_name != null ? item.exe_name : item.exe_name}</Text>
+                                            <Card containerStyle={ Styles.smallCard }>
+                                                <Text style={{...Styles.detailText, margin: 0}}>{item.exe_name != null ? item.exe_name : item.exe_name}</Text>
                                             </Card>
                                         </TouchableOpacity>
                                     )
                                 })) :
                                 (
                                     <TouchableOpacity onPress={() => addExercise(search)}>
-                                        <Card>
-                                            <Text>Nothing found, add: {search}</Text>
+                                        <Card containerStyle={ Styles.smallCard }>
+                                            <Text style={{...Styles.detailText, margin: 0}}>Nothing found, add: {search}</Text>
                                         </Card>
                                     </TouchableOpacity>
                                 )

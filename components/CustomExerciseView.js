@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getExercises } from "../services/ExerciseService";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
 import { Card } from "react-native-elements";
+import Styles from "../Styles";
 
 export function CustomExerciseView({ userid, childToParent }) {
     const [data, setData] = useState([]);
@@ -11,8 +12,8 @@ export function CustomExerciseView({ userid, childToParent }) {
     useEffect(() => {
         const getAvailableExericses = async () => {
             setLoading(true);
-            setData(await getExercises(userid));
-            console.log(data);
+            const fetchedData = await getExercises(userid)
+            setData(fetchedData);
             setLoading(false);
         }
         getAvailableExericses();
@@ -29,27 +30,26 @@ export function CustomExerciseView({ userid, childToParent }) {
         } else {
             setSelectedExercises(selectedExercises.filter(item => item !== id));
         }
-        childToParent(selectedExercises);
     }
 
     const selectedStyle = StyleSheet.create({
-        active: { backgroundColor: '#4caf50' },
-        inactive: { backgroundColor: 'white' }
+        active: { backgroundColor: '#0C7C59' },
+        inactive: { backgroundColor: '#1c1a1a' }
     });
 
     return (
         <View style={{ flex: 1 }}>
             {
-                isLoading ? <ActivityIndicator /> :
+                isLoading ? <ActivityIndicator style={Styles.activityIndicator} /> :
                     (
-                        <ScrollView contentContainerStyle={{paddingBottom: 75, backgroundColor: '#f5f5f5', borderTopLeftRadius: 6, borderTopRightRadius: 6}}>
+                        <ScrollView contentContainerStyle={{paddingBottom: 75, backgroundColor: Styles.dark.backgroundColor, borderTopLeftRadius: 6, borderTopRightRadius: 6}}>
                             {
                                 data.map((item, i) => {
                                     return (<View>
                                         <TouchableOpacity onPress={() => { addSelectedExercise(item.id) }}>
-                                            <Card key={i} containerStyle={[{ padding: 15, borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 },
+                                            <Card key={i} containerStyle={[{ marginHorizontal: 5, borderWidth: 0, borderBottomColor: '#CDCD55', borderBottomWidth: 1, padding: 15,backgroundColor: Styles.lessDark.backgroundColor },
                                             selectedExercises.includes(item.id) ? selectedStyle.active : selectedStyle.inactive]}>
-                                                <Text>{item.exe_name}</Text>
+                                                <Text style={{...Styles.detailText, margin: 0}}>{item.exe_name}</Text>
                                             </Card>
                                         </TouchableOpacity>
                                     </View>)
