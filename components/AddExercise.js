@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
-import { Button, Card, CheckBox } from "react-native-elements";
+import { Card } from "react-native-elements";
 import emitter from "./customEventEmitter";
-import { db } from '../firebaseConfig';
-import { collection, addDoc, query, getDocs, Timestamp } from 'firebase/firestore';
-import { getDefaultExercises, getExercises } from '../services/ExerciseService';
+import { getDefaultExercises, getExercises, addExercise } from '../services/ExerciseService';
+import { attachToWorkout } from '../services/WorkoutService';
 import Styles from "../Styles";
 
 
@@ -14,23 +13,17 @@ export function AddExercise({ navigation, route }) {
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
 
-    const userid = route.params.userid;
-    const workoutId = route.params.workoutid;
+    const userId = route.params.userId;
+    const workoutId = route.params.workoutId;
 
-    const addExercise = async (text) => {
+    const onAddExercise = async (name, exerciseId) => {
         try {
+            console.log(userId);
             setLoading(true);
-
-            const documentData = {
-                exe_date: Timestamp.fromDate(new Date()),
-                exe_name: text,
-                exe_max_reps: 0,
-                exe_max_weight: 0,
-                exe_usr_id: userid
-            };
-            const docRef = await addDoc(collection(db, "Exercise"), documentData);
-            if (workoutId !== null) {
-                await attachToWorkout(docRef.id, workoutId);
+            if (workoutId && exerciseId) {
+                await attachToWorkout(exerciseId, workoutId);
+            } else {
+                await addExercise(name, userId);
             }
         }
         catch (error) {
@@ -38,23 +31,11 @@ export function AddExercise({ navigation, route }) {
         }
         finally {
             setLoading(false);
-            // 0 used as a OK return code.
-            emitter.emit('exerciseEvent', 0)
-            if (workoutId != null) {
+            emitter.emit('exerciseEvent', 0);
+            if (workoutId) {
                 emitter.emit('workoutExerciseEvent', 0);
             }
             navigation.goBack();
-        }
-    }
-
-    const attachToWorkout = async (exerciseId, workoutId, goBack) => {
-        try {
-            const docRef = await addDoc(collection(db, 'Workout', workoutId, 'workout_exercise'), {
-                woe_exercise: exerciseId
-            });
-        }
-        catch (error) {
-            console.log(error);
         }
     }
 
@@ -63,8 +44,8 @@ export function AddExercise({ navigation, route }) {
         setLoading(true);
         const getAllExercises = async () => {
             var docDataArray;
-            if (workoutId != null) {
-                docDataArray = await getExercises(userid);
+            if (workoutId) {
+                docDataArray = await getExercises(userId);
             } else {
                 docDataArray = await getDefaultExercises();
             }
@@ -102,14 +83,14 @@ export function AddExercise({ navigation, route }) {
     };
 
     return (
-        <View style={{ flex: 1, alignItems: 'center', backgroundColor: Styles.dark.backgroundColor}}>
+        <View style={{ flex: 1, alignItems: 'center', backgroundColor: Styles.dark.backgroundColor }}>
 
             <View style={Styles.searchContainer}>
                 <TextInput
                     onChangeText={(text) => searchFilterFunction(text)}
                     style={Styles.searchBar}
                     placeholder='Search'
-                    placeholderTextColor={Styles.fontColor.color} // Lighter placeholder text color
+                    placeholderTextColor={Styles.fontColor.color}
                 />
             </View>
 
@@ -124,21 +105,20 @@ export function AddExercise({ navigation, route }) {
                             filteredDataSource.length > 0 ? (
                                 filteredDataSource.map((item, i) => {
                                     return (
-                                        <TouchableOpacity key={i} onPress={() => addExercise(item.exe_name)}>
-                                            <Card containerStyle={ Styles.smallCard }>
-                                                <Text style={{...Styles.detailText, margin: 0}}>{item.exe_name != null ? item.exe_name : item.exe_name}</Text>
+                                        <TouchableOpacity key={i} onPress={() => onAddExercise(item.exe_name, item.id)}>
+                                            <Card containerStyle={Styles.smallCard}>
+                                                <Text style={{ ...Styles.detailText, margin: 0 }}>{item.exe_name != null ? item.exe_name : item.exe_name}</Text>
                                             </Card>
                                         </TouchableOpacity>
                                     )
                                 })) :
                                 (
-                                    <TouchableOpacity onPress={() => addExercise(search)}>
-                                        <Card containerStyle={ Styles.smallCard }>
-                                            <Text style={{...Styles.detailText, margin: 0}}>Nothing found, add: {search}</Text>
+                                    <TouchableOpacity onPress={() => onAddExercise(search)}>
+                                        <Card containerStyle={Styles.smallCard}>
+                                            <Text style={{ ...Styles.detailText, margin: 0 }}>Nothing found, add: {search}</Text>
                                         </Card>
                                     </TouchableOpacity>
                                 )
-
                         }
                     </ScrollView>
                 )}

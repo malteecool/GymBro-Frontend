@@ -15,10 +15,12 @@ export function AddWorkout({ navigation, route }) {
     const [index, setIndex] = React.useState(0);
     const [workoutName, setWorkoutName] = React.useState('');
     const [workoutTimeEstimate, setWorkoutTimeEstimate] = useState(0);
-    const userid = route.params.userid;
     const [selectedExercises, setSelectedExercises] = useState([]);
 
+    const userid = route.params.userid;
+
     const childToParent = (childData) => {
+        console.log(childData);
         setSelectedExercises(childData);
     }
 
@@ -34,7 +36,6 @@ export function AddWorkout({ navigation, route }) {
     }, []);
 
     const onAddWorkout = async (name) => {
-
         setLoading(true);
         try {
             if (selectedExercises.length > 0) {
@@ -82,13 +83,6 @@ export function AddWorkout({ navigation, route }) {
         { key: 'default', title: 'Default workout' },
         { key: 'custom', title: 'Custom workout' },
     ]);
-
-    const responsiveTextStyle = StyleSheet.create({
-        focused: { borderColor: '#CDCD55' },
-        unfocused: { borderColor: 'black' }
-    });
-    const [estimateFocus, setEstimateFocus] = useState(false);
-    const [nameFocus, setNameFocus] = useState(false);
 
     const renderTabs = ({ route }) => {
         switch (route.key) {
@@ -143,9 +137,7 @@ export function AddWorkout({ navigation, route }) {
                             <TextInput onChangeText={(text) => setWorkoutName(text)} style={Styles.searchBar}
                                 placeholder='Workout name'
                                 placeholderTextColor='gray'
-                                value={workoutName}
-                                onFocus={() => setNameFocus(true)}
-                                onBlur={() => setNameFocus(false)} />
+                                value={workoutName} />
                         </View>
                         <View style={Styles.searchContainer}>
                             <TextInput onChangeText={(text) => setWorkoutTimeEstimate(text)} style={Styles.searchBar}
@@ -153,8 +145,6 @@ export function AddWorkout({ navigation, route }) {
                                 placeholder='Estimate time'
                                 placeholderTextColor='gray'
                                 value={workoutTimeEstimate}
-                                onFocus={() => setEstimateFocus(true)}
-                                onBlur={() => setEstimateFocus(false)}
                             />
                         </View>
 

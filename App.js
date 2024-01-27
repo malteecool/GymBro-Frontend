@@ -158,16 +158,14 @@ export default function App() {
                 setRequireRefresh(!isTokenFresh);
                 const userData = await getUserData(authFromJson);
                 if (userData.id) {
-                    const dbUser = await userExist(userData.id);
+                    /*const dbUser = await userExist(userData.id);
                     if (dbUser == null) {
-                        // could probably be removed, not needed.
                         const newUser = await addUser(userData);
-                    }
+                    }*/
                     setUserInfo(userData);
                 } else if (userData.error?.code == 401) {
-                    console.log("refreshing token")
+                    console.log("refreshing token");
                     const clientId = process.env.REACT_APP_TOKEN;
-                    console.log(clientId)
                     const tokenResult = await AuthSession.refreshAsync({
                         clientId: clientId,
                         refreshToken: authFromJson.refreshToken

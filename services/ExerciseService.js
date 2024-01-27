@@ -1,5 +1,5 @@
 import { db } from "../firebaseConfig";
-import { collection, query, getDocs, where, Timestamp, deleteDoc, doc, updateDoc, getDoc } from "firebase/firestore";
+import { collection, query, getDocs, where, Timestamp, deleteDoc, doc, updateDoc, getDoc, addDoc } from "firebase/firestore";
 
 
 async function getExercises(usr_id) {
@@ -115,6 +115,19 @@ async function updateExerciseDate(exe_id) {
     })
 }
 
+
+async function addExercise(name, usr_id) {
+
+    const documentData = {
+        exe_date: Timestamp.fromDate(new Date()),
+        exe_name: name,
+        exe_max_reps: 0,
+        exe_max_weight: 0,
+        exe_usr_id: usr_id
+    };
+    const docRef = await addDoc(collection(db, "Exercise"), documentData);
+}
+
 async function updateExerciseMaxWeight(exe_id, weight) {
     const docSnap = await getDoc(doc(db, 'Exercise', exe_id));
     if (weight > docSnap.data().exe_max_weight) {
@@ -162,5 +175,6 @@ module.exports = {
     updateExerciseDate: updateExerciseDate,
     updateExerciseMaxWeight: updateExerciseMaxWeight,
     getDefaultExercises: getDefaultExercises,
-    getHistoryByUser: getHistoryByUser
+    getHistoryByUser: getHistoryByUser,
+    addExercise: addExercise
 };

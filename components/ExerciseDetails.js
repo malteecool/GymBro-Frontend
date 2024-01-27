@@ -58,7 +58,7 @@ export function ExerciseDetails({ navigation, route }) {
                     <ScrollView style={{ width: '100%' }}>{
                         data.map((exercise, i) => (
                             <Card key={i} containerStyle={{ ...Styles.card, paddingHorizontal: 0, paddingBottom: 0 }}>
-                                <Card.Title style={{ ...Styles.cardTitle, color: '#E5E3D4', alignSelf: 'flex-start', paddingHorizontal: 16, fontSize: 25, backgroundColor: '#0C7C59', marginLeft: 0 }}><Text style={{ fontSize: 30 }}>{getFirebaseTimeStamp(exercise.exh_date.seconds, exercise.exh_date.nanoseconds).toDateString()}</Text></Card.Title>
+                                <Card.Title style={{ ...Styles.cardTitle, color: '#E5E3D4', alignSelf: 'flex-start', paddingHorizontal: 16, fontSize: 25, backgroundColor: '#0C7C59', marginLeft: 0}}><Text style={{ fontSize: 30 }}>{getFirebaseTimeStamp(exercise.exh_date.seconds, exercise.exh_date.nanoseconds).toDateString()}</Text></Card.Title>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', paddingBottom: 5, }}>
                                     <Text style={{ marginHorizontal: 0, ...Styles.detailText, fontWeight: 'bold' }}>{LABEL_WEIGHT}</Text>
                                     <Text style={{ marginHorizontal: 0, ...Styles.detailText, fontWeight: 'bold' }}>{LABEL_REPS}</Text>

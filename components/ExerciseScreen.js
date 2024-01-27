@@ -119,7 +119,7 @@ export function ExcerciseScreen({ navigation, route }) {
                                         </TouchableOpacity>
                                     </View>
                                     <Card.Divider color={Styles.yellow.backgroundColor}></Card.Divider>
-
+                                    
                                     <View style={Styles.details}>
                                         <Text style={Styles.detailText}><MaterialCommunityIcons style={Styles.icon} name='weight-kilogram' size={20} />{' ' + item.exe_max_weight}</Text>
                                         <Text style={Styles.detailText}><MaterialCommunityIcons style={Styles.icon} name='calendar-range' size={20} />{' ' + (item.exe_date !== null ? exerciseDate.toDateString() : "Never")}</Text>
@@ -135,7 +135,7 @@ export function ExcerciseScreen({ navigation, route }) {
                 bottom: 10,
                 right: 10,
             }}>
-                <Button onPress={() => { navigation.navigate('addExercise', { userid: user.id, workoutid: null }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7', backgroundColor: Styles.green.backgroundColor }} />
+                <Button onPress={() => { navigation.navigate('addExercise', { userId: user.id, workoutid: null }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7', backgroundColor: Styles.green.backgroundColor }} />
             </TouchableOpacity>
         </View>
     )
