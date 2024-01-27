@@ -1,9 +1,11 @@
-import { Text, View, ActivityIndicator, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { Text, View, ActivityIndicator, TouchableOpacity, ScrollView, TextInput, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Card, Button } from 'react-native-elements';
 import emitter from './customEventEmitter';
 import { getExercises, removeExercise as removeExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService';
+import Styles from '../Styles';
+
 
 export function ExcerciseScreen({ navigation, route }) {
     const [isLoading, setLoading] = useState(true);
@@ -86,53 +88,46 @@ export function ExcerciseScreen({ navigation, route }) {
     }, []);
 
     return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <View style={{ width: '100%', flexWrap: 'wrap', flexDirection: 'row', justifyContent: 'center', alignContent: 'center'}}>
-                <TextInput onChangeText={(text) => searchFilterFunction(text)} style={{
-                    height: 40,
-                    borderBottomWidth: 1,
-                    padding: 5,
-                    margin: 5,
-                    borderRadius: 6,
-                    flexBasis: '85%',
-                    alignSelf: 'flex-start'
-                }}
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Styles.dark.backgroundColor }}>
+            <View style={Styles.searchContainer}>
+                <TextInput
+                    onChangeText={(text) => searchFilterFunction(text)}
+                    style={Styles.searchBar}
                     placeholder='Search'
+                    placeholderTextColor={Styles.fontColor.color} // Lighter placeholder text color
                 />
             </View>
             {isLoading ? (
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <View style={Styles.activityIndicator}>
                     <ActivityIndicator />
-                    <Text>Fetching exercises...</Text>
+                    <Text style={Styles.fontColor}>Fetching exercises...</Text>
                 </View>
             ) : (
                 <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 20 }}>{
 
                     filteredDataSource.map((item, i) => {
 
-                        var ExerciseDate = getFirebaseTimeStamp(item.exe_date.seconds, item.exe_date.nanoseconds);
+                        var exerciseDate = getFirebaseTimeStamp(item.exe_date.seconds, item.exe_date.nanoseconds);
 
                         return (
                             <TouchableOpacity key={i} onPress={() => { navigation.navigate('exerciseDetails', { exercise: item }) }}>
-                                <Card containerStyle={{ borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <Card.Title>{item.exe_name}</Card.Title>
-                                        <View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'flex-end' }}>
-                                            <TouchableOpacity onPress={() => removeExercise(item.id)} style={{ margin: 0, padding: 3 }}>
-                                                <MaterialCommunityIcons name="trash-can-outline" size={16} color='highcontrastdark' />
-                                            </TouchableOpacity>
-                                        </View>
+                                <Card containerStyle={Styles.card}>
+                                    <View style={Styles.header}>
+                                        <Card.Title style={Styles.cardTitle}><Text>{item.exe_name}</Text></Card.Title>
+                                        <TouchableOpacity onPress={() => removeExercise(item.id)} style={Styles.trashIcon}>
+                                            <MaterialCommunityIcons name="trash-can-outline" size={22} color={Styles.yellow.backgroundColor} />
+                                        </TouchableOpacity>
                                     </View>
-                                    <Card.Divider color='black'></Card.Divider>
+                                    <Card.Divider color={Styles.yellow.backgroundColor}></Card.Divider>
 
-                                    <Text><MaterialCommunityIcons name='weight-kilogram' size={16} />{item.exe_max_weight}</Text>
-
-                                    <Text><MaterialCommunityIcons name='calendar-range' size={16} />{item.exe_date !== null ? ExerciseDate.toDateString() : "Never"}</Text>
+                                    <View style={Styles.details}>
+                                        <Text style={Styles.detailText}><MaterialCommunityIcons style={Styles.icon} name='weight-kilogram' size={20} />{' ' + item.exe_max_weight}</Text>
+                                        <Text style={Styles.detailText}><MaterialCommunityIcons style={Styles.icon} name='calendar-range' size={20} />{' ' + (item.exe_date !== null ? exerciseDate.toDateString() : "Never")}</Text>
+                                    </View>
                                 </Card>
                             </TouchableOpacity>
                         )
                     })
-
                 }</ScrollView>
             )}
             <TouchableOpacity style={{
@@ -140,7 +135,7 @@ export function ExcerciseScreen({ navigation, route }) {
                 bottom: 10,
                 right: 10,
             }}>
-                <Button onPress={() => { navigation.navigate('addExercise', { userid: user.id, workoutid: null }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7' }} />
+                <Button onPress={() => { navigation.navigate('addExercise', { userid: user.id, workoutid: null }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7', backgroundColor: Styles.green.backgroundColor }} />
             </TouchableOpacity>
         </View>
     )

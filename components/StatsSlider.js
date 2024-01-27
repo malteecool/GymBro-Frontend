@@ -21,23 +21,23 @@ const renderDynamicComponent = (sliderComponent, props) => {
 }
 
 const StatsSlider = ({ sliderComponent, stats }) => {
-
     const [activeIndex, setActiveIndex] = useState(0);
     const sliderWidth = Dimensions.get('window').width;
-
 
     const _renderItem = ({ item, index }) => {
         return (
             <View style={styles.cardContainer}>
                 <View style={{
                     flex: 1,
-                    margin: 10
+                    margin: 10,
+                    backgroundColor: '#1c1a1a'
                 }}>
                     <Text style={{
                         fontSize: 20,
                         marginLeft: 10,
                         marginTop: 10,
                         fontWeight: 'bold',
+                        color: '#CDCD55'
                     }}>{item.title}</Text>
                     <View style={{
                         flex: 1,
@@ -45,18 +45,16 @@ const StatsSlider = ({ sliderComponent, stats }) => {
                         alignContent: 'center',
                         marginTop: -20
                     }}>
-                        {renderDynamicComponent(sliderComponent, { item })}
+                        { renderDynamicComponent(sliderComponent, { item }) }
                     </View>
                 </View>
             </View>
         );
-
     }
 
     return (
         <View>
             <Carousel
-                style={{ backgroundColor: 'floralwhite', }}
                 layout={'default'}
                 data={stats}
                 sliderWidth={sliderWidth}
@@ -69,7 +67,6 @@ const StatsSlider = ({ sliderComponent, stats }) => {
                 activeDotIndex={stats.length > 1 ? activeIndex : 1}
                 inactiveDotOpacity={stats.length > 1 ? 0.5 : 0}
                 containerStyle={{
-                    
                     width: 50,
                     height: 10,
                     padding: 0,
@@ -82,6 +79,7 @@ const StatsSlider = ({ sliderComponent, stats }) => {
                     width: 10,
                     height: 10,
                     borderRadius: 5,
+                    backgroundColor: 'white'
                 }}
 
                 inactiveDotScale={0.6}
@@ -93,11 +91,11 @@ const StatsSlider = ({ sliderComponent, stats }) => {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        backgroundColor: 'floralwhite',
-        borderRadius: 30,
+        backgroundColor: '#1c1a1a',
+        //borderRadius: 30,
         height: 250,
         marginLeft: 5,
-        elevation: 2,
+        elevation: 5,
         marginBottom: 3,
         marginRight: 5,
         shadowColor: '#000',

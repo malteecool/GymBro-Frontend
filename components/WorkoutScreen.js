@@ -4,6 +4,8 @@ import { Card, Button } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import emitter from './customEventEmitter'
 import { removeWorkout as removeWorkoutService, getWorkouts, getFirebaseTimeStamp } from '../services/WorkoutService';
+import Styles from '../Styles';
+
 
 export function WorkoutScreen({ navigation, route }) {
     const [data, setData] = useState([]);
@@ -72,27 +74,33 @@ export function WorkoutScreen({ navigation, route }) {
     }
 
     return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Styles.dark.backgroundColor }}>
             {
-                isLoading ? (<View><ActivityIndicator /><Text>Fetching Workouts...</Text></View>) : (
+                isLoading ? (
+                    <View style={Styles.activityIndicator}>
+                        <ActivityIndicator />
+                        <Text style={Styles.fontColor}>Fetching Workouts...</Text>
+                    </View>) : (
                     <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 20 }}>{
 
                         data.map((item, i) => {
                             return (
                                 <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetails', { workout: item }) }}>
-                                    <Card key={i} containerStyle={{ borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <Card.Title>{item.wor_name}</Card.Title>
-                                            <View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'flex-end' }}>
-                                                <TouchableOpacity onPress={() => warnUser(item)} style={{ margin: 0, padding: 3 }}>
-                                                    <MaterialCommunityIcons name="trash-can-outline" size={16} color='highcontrastdark' />
-                                                </TouchableOpacity>
-                                            </View>
+                                    <Card containerStyle={Styles.card}>
+                                        <View style={Styles.header}>
+                                            <Card.Title style={Styles.cardTitle}>{item.wor_name}</Card.Title>
+
+                                            <TouchableOpacity onPress={() => warnUser(item)} style={Styles.trashIcon}>
+                                                <MaterialCommunityIcons name="trash-can-outline" size={20} color={Styles.yellow.backgroundColor} />
+                                            </TouchableOpacity>
+
                                         </View>
-                                        <Card.Divider color='black'></Card.Divider>
-                                        <Text><MaterialCommunityIcons name='calendar-range' size={16} /> {item.wor_last_done !== null ? getFirebaseTimeStamp(item.wor_last_done.seconds, item.wor_last_done.nanoseconds).toDateString() : 'never'}</Text>
-                                        <Text><MaterialCommunityIcons name='dumbbell' size={16} /> {Object.keys(item.wor_workout_exercises).length}</Text>
-                                        <Text><MaterialCommunityIcons name='clock-time-four-outline' size={16} /> {getFormattedTime(item.wor_estimate_time)}</Text>
+                                        <Card.Divider color={Styles.yellow.backgroundColor}></Card.Divider>
+                                        <View style={{...Styles.details, flexDirection: 'column'}}>
+                                            <Text style={Styles.detailText}><MaterialCommunityIcons style={Styles.icon} name='calendar-range' size={16} /> {item.wor_last_done !== null ? getFirebaseTimeStamp(item.wor_last_done.seconds, item.wor_last_done.nanoseconds).toDateString() : 'never'}</Text>
+                                            <Text style={Styles.detailText}><MaterialCommunityIcons style={Styles.icon} name='dumbbell' size={16} /> {Object.keys(item.wor_workout_exercises).length}</Text>
+                                            <Text style={Styles.detailText}><MaterialCommunityIcons style={Styles.icon} name='clock-time-four-outline' size={16} /> {getFormattedTime(item.wor_estimate_time)}</Text>
+                                        </View>
                                     </Card>
                                 </TouchableOpacity>
                             )
@@ -105,7 +113,7 @@ export function WorkoutScreen({ navigation, route }) {
                 bottom: 10,
                 right: 10,
             }}>
-                <Button onPress={() => { navigation.navigate('addWorkout', { userid: user.id }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7' }} />
+                <Button onPress={() => { navigation.navigate('addWorkout', { userid: user.id }) }} title='+' titleStyle={{ fontSize: 24 }} buttonStyle={{ width: 60, height: 60, borderRadius: 30, borderColor: '#1c7bc7', backgroundColor: Styles.green.backgroundColor }} />
             </TouchableOpacity>
         </View>
     )

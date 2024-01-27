@@ -1,26 +1,23 @@
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect } from "react";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Button } from "react-native-elements";
 import { Card } from "react-native-elements";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import emitter from "./customEventEmitter";
-import { REACT_APP_URL } from '@env';
 import { removeWorkoutExercise as removeWorkoutExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService';
 import { getWorkoutExercises, updateWorkout, getFormattedTime } from '../services/WorkoutService';
+import Styles from "../Styles";
 
-// https://www.reactnativeschool.com/build-a-stop-watch-hook-that-works-even-when-the-app-is-quit
 
 export function WorkoutDetails({ navigation, route }) {
 
     const [running, setRunning] = useState(false);
     const [isLoading, setLoading] = useState(true);
-    const [currentTime, setCurrentTime] = useState(0);
     const [data, setData] = useState([]);
     const [time, setTime] = useState(0);
     const [startTime, setStartTime] = useState(0);
     const [intervalTime, setIntervalTime] = useState(0);
-    //let startTime = null;
 
     const workout = route.params.workout;
 
@@ -39,6 +36,7 @@ export function WorkoutDetails({ navigation, route }) {
     useEffect(() => {
         load();
     }, []);
+
 
     const saveWorkout = async () => {
         try {
@@ -106,36 +104,37 @@ export function WorkoutDetails({ navigation, route }) {
         }
         setRunning(!running);
     };
-    // https://aloukissas.medium.com/how-to-build-a-background-timer-in-expo-react-native-without-ejecting-ea7d67478408
     return (
-        <View style={{ flex: 1 }}>{isLoading ? (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{ flex: 1, backgroundColor: '#121111' }}>{isLoading ? (
+            <View style={Styles.activityIndicator}>
                 <ActivityIndicator />
             </View>
         ) : (
             <View style={{ flex: 1 }}>
                 <View>
-                    <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 100 }}>
-                        {
-                            data.map((workout, i) => (
+                    <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 100 }}>{
+                        data.map((workout, i) => {
+                            var exerciseDate = getFirebaseTimeStamp(workout.exe_date.seconds, workout.exe_date.nanoseconds);
+                            return (
                                 <TouchableOpacity key={workout.exe_name} onPress={() => { navigation.navigate('exerciseDetailsWorkout', { exercise: workout }) }}>
-                                    <Card key={i} containerStyle={{ borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <Card.Title>{workout.exe_name}</Card.Title>
-                                            <View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'flex-end' }}>
-                                                <TouchableOpacity onPress={() => removeWorkoutExercise(workout.id)} style={{ margin: 0, padding: 3 }}>
-                                                    <MaterialCommunityIcons name="trash-can-outline" size={16} color='highcontrastdark' />
-                                                </TouchableOpacity>
-                                            </View>
+                                    <Card key={i} containerStyle={Styles.card}>
+                                        <View style={Styles.header}>
+                                            <Card.Title style={Styles.cardTitle}>{workout.exe_name}</Card.Title>
+                                            <TouchableOpacity onPress={() => removeWorkoutExercise(workout.id)} style={Styles.trashIcon}>
+                                                <MaterialCommunityIcons name="trash-can-outline" size={22} color={Styles.yellow.backgroundColor} />
+                                            </TouchableOpacity>
+
                                         </View>
-                                        <Card.Divider color='black'></Card.Divider>
+                                        <Card.Divider color={Styles.yellow.backgroundColor}></Card.Divider>
 
-                                        <Text><MaterialCommunityIcons name='weight-kilogram' size={16} />{workout.exe_max_weight}</Text>
-
-                                        <Text><MaterialCommunityIcons name='calendar-range' size={16} />{workout.exe_date !== null ? getFirebaseTimeStamp(workout.exe_date.seconds, workout.exe_date.milliseconds).toDateString() : 'never'}</Text>
+                                        <View style={Styles.details}>
+                                            <Text style={Styles.detailText}><MaterialCommunityIcons name='weight-kilogram' size={16} style={Styles.icon} />{' ' + workout.exe_max_weight}</Text>
+                                            <Text style={Styles.detailText}><MaterialCommunityIcons name='calendar-range' size={16} style={Styles.icon} />{' ' + (workout.exe_date !== null ? exerciseDate.toDateString() : 'never')}</Text>
+                                        </View>
                                     </Card>
-                                </TouchableOpacity>))
-                        }
+                                </TouchableOpacity>)
+                        })
+                    }
                     </ScrollView>
 
                 </View>
@@ -147,18 +146,19 @@ export function WorkoutDetails({ navigation, route }) {
                     bottom: 45
                 }}>
                     <View style={{ flex: 1, margin: 10, marginRight: 2 }}>
-                        <Button title={running ? 'Stop' : 'Start'} onPress={() => { startAndStop() }} />
+                        <Button buttonStyle={Styles.green} title={running ? 'Stop' : 'Start'} onPress={() => { startAndStop() }} />
                     </View>
                     <View style={{ flex: 1, margin: 10, marginLeft: 2 }}>
-                        <Button onPress={() => { navigation.navigate('addExercise', { userid: workout.wor_usr_id, workoutid: workout.id }) }} title='Add exercise' />
+                        <Button buttonStyle={Styles.green} onPress={() => { navigation.navigate('addExercise', { userid: workout.wor_usr_id, workoutid: workout.id }) }} title='Add exercise' />
                     </View>
                 </View>
                 <View style={{ position: 'absolute', width: '100%', bottom: 0 }}>
-                    <Button disabled={time <= 0} title='Complete' buttonStyle={{ margin: 10 }} onPress={() => { saveWorkout() }} />
+                    <Button disabled={time <= 0} title='Complete' buttonStyle={{ margin: 10, ...Styles.green }} onPress={() => { saveWorkout() }} />
                 </View>
             </View>
-        )}
-        </View>
+        )
+        }
+        </View >
     )
 
 }

@@ -5,13 +5,14 @@ import { ActivityIndicator } from 'react-native-paper';
 import { Card2 } from './customCard';
 import emitter from './customEventEmitter';
 import { postExercise } from '../services/SetService';
+import Styles from '../Styles';
 
 export function AddSet({ navigation, route }) {
 
     const exercise = route.params.exercise;
     const [isLoading, setLoading] = useState(false);
     const [data, setData] = useState([]);
-    
+
     const childToParent = (childData) => {
         setData(childData);
     }
@@ -21,7 +22,7 @@ export function AddSet({ navigation, route }) {
             setLoading(true);
             await postExercise(exercise, data)
         }
-        
+
         catch (error) {
             console.log(error);
         }
@@ -34,13 +35,13 @@ export function AddSet({ navigation, route }) {
     }
 
     return (
-        <View style={{ flex:1 }}>{
+        <View style={{ flex: 1, ...Styles.dark }}>{
             isLoading ? (
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <View style={Styles.activityIndicator}>
                     <ActivityIndicator />
                 </View>
             ) : (
-                <View style={{flex:1}}>
+                <View style={{ flex: 1, }}>
                     <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
                         <Card2 historyId={exercise.id} childToParent={childToParent} />
                     </ScrollView>

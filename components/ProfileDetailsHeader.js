@@ -1,47 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Text, ActivityIndicator } from "react-native";
 import { getWorkoutsCount } from '../services/StatsService';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Styles from "../Styles";
 
-export function ProfileDetailsHeader({ user }) {
+export function ProfileDetailsHeader({ user, numberOfTimes}) {
 
     const [data, setData] = useState([]);
     const [isLoading, setLoading] = useState(true);
-
-    const styles = StyleSheet.create({
-        container: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 20,
-            height: 250,
-            marginBottom: 10,
-            backgroundColor: '#3498db',
-            borderBottomLeftRadius: 30,
-            borderBottomRightRadius: 30,
-            marginLeft: 5,
-            marginRight: 5,
-            elevation: 5,
-        },
-        button: {
-            flex: 1,
-            height: 80,
-            borderRadius: 40,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: '#2980b9',
-        },
-        buttonText: {
-            color: 'white',
-            fontSize: 16,
-        },
-        profileImage: {
-            width: 50,
-            height: 50,
-            borderRadius: 25,
-            margin: 5,
-        },
-    });
 
     const load = async () => {
         try {
@@ -60,44 +25,33 @@ export function ProfileDetailsHeader({ user }) {
         load();
     }, []);
 
+    useEffect(() => {
+        console.log(numberOfTimes);
+    }, [numberOfTimes]);
+
     return (
-        <View style={styles.container}>
-            <TouchableOpacity style={{ ...styles.button, marginRight: 10 }}>
-                <MaterialCommunityIcons
-                    name='bell'
-                    size={30}
-                    color='#ecf0f1'
-                />
-            </TouchableOpacity>
+        <View style={Styles.container}>
             <TouchableOpacity style={{
                 flex: 1,
-                height: 120,
-                borderRadius: 60,
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginHorizontal: 10,
-                backgroundColor: '#2ecc71',
+                marginTop: 10,
             }}
                 disabled={true}>
-                <Image
-                    source={{ uri: user.picture }}
-                    style={{
-                        width: 120,
-                        height: 120,
-                        borderRadius: 60,
-                    }}
-                />
-            </TouchableOpacity>
-            <TouchableOpacity style={{ ...styles.button, marginLeft: 10 }}>
-                <MaterialCommunityIcons
-                    name='cog'
-                    size={30}
-                    color='#ecf0f1'
-                />
-            </TouchableOpacity>
+                <Text style={{...Styles.oswaldBold}}>
+                YOU'VE BEEN TO THE GYM 
+                {!numberOfTimes ? (<ActivityIndicator size="large"/>) : (<Text style={{...Styles.oswaldBold, color: '#0C7C59'}}> {numberOfTimes[0].count} </Text>)}
+                {numberOfTimes && numberOfTimes[0].count > 1 ? ( <Text style={{...Styles.oswaldBold, color: '#0C7C59'}}>TIMES </Text>) : <Text style={{...Styles.oswaldBold, color: '#0C7C59'}}>TIME </Text>}
+                THIS WEEK, KEEP GOING!
+                </Text>
+                </TouchableOpacity>
+            
         </View>
     );
 
 }
+
+
 
 export default ProfileDetailsHeader;

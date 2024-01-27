@@ -4,9 +4,8 @@ import { Button, Card } from "react-native-elements";
 import { TabView, TabBar } from 'react-native-tab-view';
 import CustomExerciseView from "./CustomExerciseView";
 import emitter from "./customEventEmitter";
-import { postWorkoutExercise, addWorkout, addWorkoutWithExercises, getDefaultWorkouts } from '../services/WorkoutService';
-import { db } from '../firebaseConfig';
-import { collection, addDoc, query, getDocs, Timestamp } from 'firebase/firestore';
+import { addWorkout, addWorkoutWithExercises, getDefaultWorkouts } from '../services/WorkoutService';
+import Styles from "../Styles";
 
 export function AddWorkout({ navigation, route }) {
     const [isLoading, setLoading] = useState(false);
@@ -16,14 +15,11 @@ export function AddWorkout({ navigation, route }) {
     const [index, setIndex] = React.useState(0);
     const [workoutName, setWorkoutName] = React.useState('');
     const [workoutTimeEstimate, setWorkoutTimeEstimate] = useState(0);
-    const [workoutNameExample, setWorkoutNameExample] = useState('');
     const userid = route.params.userid;
-    const workoutNameArray = ['Chest', 'Legs', 'Back'];
     const [selectedExercises, setSelectedExercises] = useState([]);
 
     const childToParent = (childData) => {
         setSelectedExercises(childData);
-        console.log(selectedExercises);
     }
 
     useEffect(() => {
@@ -42,6 +38,7 @@ export function AddWorkout({ navigation, route }) {
         setLoading(true);
         try {
             if (selectedExercises.length > 0) {
+                console.log("adding workout with exercises");
                 await addWorkoutWithExercises(name, selectedExercises, userid);
             } else {
                 await addWorkout(name, userid);
@@ -57,13 +54,6 @@ export function AddWorkout({ navigation, route }) {
             navigation.goBack();
         }
     }
-
-    const onAddWorkoutWithExercises = async (name) => {
-        setLoading(true);
-
-        setLoading(false);
-    }
-
     const searchFilterFunction = (text) => {
         // Check if searched text is not blank
         if (text) {
@@ -94,7 +84,7 @@ export function AddWorkout({ navigation, route }) {
     ]);
 
     const responsiveTextStyle = StyleSheet.create({
-        focused: { borderColor: '#2296f3' },
+        focused: { borderColor: '#CDCD55' },
         unfocused: { borderColor: 'black' }
     });
     const [estimateFocus, setEstimateFocus] = useState(false);
@@ -104,18 +94,16 @@ export function AddWorkout({ navigation, route }) {
         switch (route.key) {
             case 'default':
                 return (
-                    <View style={{ flex: 1, alignItems: 'center' }}>
+                    <View style={{ flex: 1, alignItems: 'center', backgroundColor: '#121111' }}>
 
-                        <TextInput onChangeText={(text) => searchFilterFunction(text)} style={{
-                            width: '93%',
-                            height: 40,
-                            margin: 12,
-                            marginTop: 20,
-                            borderBottomWidth: 1,
-                            padding: 10,
-                        }}
-                            placeholder='Search'
-                            value={search} />
+                        <View style={Styles.searchContainer}>
+                            <TextInput
+                                onChangeText={(text) => searchFilterFunction(text)}
+                                style={Styles.searchBar}
+                                placeholder='Search'
+                                placeholderTextColor={Styles.fontColor.color} // Lighter placeholder text color
+                            />
+                        </View>
                         <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
                             {isLoading ? (
                                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -128,16 +116,16 @@ export function AddWorkout({ navigation, route }) {
                                             filteredDataSource.map((item, i) => {
                                                 return (
                                                     <TouchableOpacity onPress={() => onAddWorkout(item.def_name)}>
-                                                        <Card key={i} containerStyle={{ padding: 15, borderRadius: 6, borderBottomWidth: 2, borderRightWidth: 2 }}>
-                                                            <Text>{item.def_name}</Text>
+                                                        <Card key={i} containerStyle={ Styles.smallCard }>
+                                                            <Text style={{ ...Styles.detailText, margin: 0 }}>{item.def_name}</Text>
                                                         </Card>
                                                     </TouchableOpacity>
                                                 )
                                             })) :
                                             (
                                                 <TouchableOpacity onPress={() => onAddWorkout(search, 0)}>
-                                                    <Card>
-                                                        <Text>Nothing found, add: {search}</Text>
+                                                    <Card containerStyle={ Styles.smallCard }>
+                                                        <Text style={{ ...Styles.detailText, margin: 0 }} >Nothing found, add: {search}</Text>
                                                     </Card>
                                                 </TouchableOpacity>
                                             )
@@ -150,35 +138,20 @@ export function AddWorkout({ navigation, route }) {
                 );
             case 'custom':
                 return (
-                    <View style={{ height: '100%', marginTop: 10 }}>
-                        <Text style={{ margin: 5, fontSize: 16 }}>Name</Text>
-                        <TextInput onChangeText={(text) => setWorkoutName(text)} style={[{
-                            width: '93%',
-                            height: 40,
-                            borderBottomWidth: 1,
-                            padding: 5,
-                            margin: 5,
-                            borderRadius: 6,
-                            backgroundColor: '#fff'
-                        }, nameFocus ? responsiveTextStyle.focused : responsiveTextStyle.unfocused]}
-                            placeholder={workoutNameExample}
-                            value={workoutName}
-                            onFocus={() => setNameFocus(true)}
-                            onBlur={() => setNameFocus(false)} />
-                        <Text style={{ margin: 5, fontSize: 16 }}>Estimate Time</Text>
-                        <View pointerEvents="auto">
-                            <TextInput onChangeText={(text) => setWorkoutTimeEstimate(text)} style={[{
-                                width: '93%',
-                                height: 40,
-                                borderBottomWidth: 1,
-                                padding: 5,
-                                margin: 5,
-                                borderRadius: 6,
-                                backgroundColor: '#fff',
-                                },
-                                estimateFocus ? responsiveTextStyle.focused : responsiveTextStyle.unfocused]}
+                    <View style={{ height: '100%', marginTop: 0, backgroundColor: '#121111' }}>
+                        <View style={Styles.searchContainer}>
+                            <TextInput onChangeText={(text) => setWorkoutName(text)} style={Styles.searchBar}
+                                placeholder='Workout name'
+                                placeholderTextColor='gray'
+                                value={workoutName}
+                                onFocus={() => setNameFocus(true)}
+                                onBlur={() => setNameFocus(false)} />
+                        </View>
+                        <View style={Styles.searchContainer}>
+                            <TextInput onChangeText={(text) => setWorkoutTimeEstimate(text)} style={Styles.searchBar}
                                 keyboardType='numeric'
-                                placeholder='0'
+                                placeholder='Estimate time'
+                                placeholderTextColor='gray'
                                 value={workoutTimeEstimate}
                                 onFocus={() => setEstimateFocus(true)}
                                 onBlur={() => setEstimateFocus(false)}
@@ -186,13 +159,12 @@ export function AddWorkout({ navigation, route }) {
                         </View>
 
                         <View style={{ flex: 1 }}>
-                            <Text style={{ margin: 5, fontSize: 16 }}>My exercises</Text>
-                            <View style={{ flex: 1, backgroundColor: '#edeaea' }}>
+                            <View style={{ flex: 1 }}>
                                 <CustomExerciseView userid={userid} childToParent={childToParent} />
                             </View>
                         </View>
                         <View style={{ position: 'absolute', width: '100%', bottom: 10 }}>
-                            <Button disabled={workoutName.length <= 0} title='Create' buttonStyle={{ margin: 10 }} onPress={() => { onAddWorkout(workoutName) }} />
+                            <Button disabled={workoutName.length <= 0} title='Create' titleStyle={{fontSize: 18}} buttonStyle={{ margin: 10, backgroundColor: Styles.green.backgroundColor }} onPress={() => { onAddWorkout(workoutName) }} />
                         </View>
                     </View>
                 );
@@ -202,10 +174,16 @@ export function AddWorkout({ navigation, route }) {
     return (
         <View style={{ flex: 1 }}>
             <TabView
-
                 swipeEnabled={true}
-                renderTabBar={TabBar}
-
+                renderTabBar={props => <TabBar
+                    {...props}
+                    style={Styles.green }
+                    renderLabel={({route, color}) => (
+                        <Text style={{ fontSize: 18, ...Styles.fontColor }}>
+                          {route.title}
+                        </Text>
+                      )}
+                />}
                 navigationState={{ index, routes }}
                 renderScene={renderTabs}
                 onIndexChange={setIndex}

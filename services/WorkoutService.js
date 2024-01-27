@@ -1,4 +1,3 @@
-import { REACT_APP_URL } from '@env';
 import { db } from "../firebaseConfig";
 import emitter from "../components/customEventEmitter";
 import { collection, query, getDocs, where, Timestamp, getDoc, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
@@ -16,8 +15,8 @@ async function getWorkouts(usrToken) {
         tempDoc = { id: doc.id, wor_workout_exercises: exerciseList, ...tempDoc };
         workoutData.push(tempDoc);
     }
-
-    workoutData.sort((a, b) => a.exe_date <= b.exe_date);
+    
+    workoutData.sort((a, b) => a.wor_last_done <= b.wor_last_done);
     return workoutData;
 }
 
@@ -87,20 +86,15 @@ const getFormattedTime = (time) => {
 }
 
 async function addWorkoutWithExercises(workoutName, selectedExercises, usrToken) {
-    
     try {
         console.log(usrToken);
-        const workout = await addWorkout(workoutName, usrToken);
-
+        const workoutId = await addWorkout(workoutName, usrToken);
         for (const exericseId of selectedExercises) {
-            const docRef = await addDoc(collection(db, 'Workout', workout.id, 'workout_exercise'), {
+            const docRef = await addDoc(collection(db, 'Workout', workoutId, 'workout_exercise'), {
                 woe_exercise: exericseId
             });
         }
-
-        
         emitter.emit('workoutEvent', 0);
-        navigation.goBack();
     } catch (error) {
         console.log(`Error fetching data: ${error.message}`);
     }
@@ -116,10 +110,12 @@ async function addWorkout(name, usrToken) {
             wor_usr_id: usrToken
         };
         const docRef = await addDoc(collection(db, "Workout"), documentData);
+        return docRef.id;
     }
     catch (error) {
         console.log(error);
     }
+    return null;
 }
 
 async function removeWorkout(workoutId) {
