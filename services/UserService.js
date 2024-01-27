@@ -1,11 +1,11 @@
-import { ref, getBytes, getBlob, getStream } from "firebase/storage";
-import { db, storage } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
 import { collection, addDoc, query, getDocs, where } from "firebase/firestore";
 
 function getClientId() {
     if (Platform.OS === 'ios') {
         return process.env.REACT_APP_TOKEN;
     } else if (Platform.OS === 'android') {
+        console.log("getting android token");
         return process.env.REACT_APP_TOKEN;
     } else {
         console.log('Invalid platform - not handled');
@@ -25,14 +25,10 @@ async function userExist(id) {
 }
 
 async function getUserData(auth) {
-    console.log("access token => " + auth.accessToken);
     let userInfoResponse = await fetch('https://www.googleapis.com/userinfo/v2/me', {
         headers: { Authorization: `Bearer ${auth.accessToken}` }
     });
     const responseJson = await userInfoResponse.json();
-    console.log('getUserdata:');
-    console.log(responseJson);
-
     return responseJson;
 };
 
