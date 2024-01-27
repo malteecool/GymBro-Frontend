@@ -56,8 +56,10 @@ export function ProfileScreen({ navigation, route }) {
             result[weekNumber].push(date);
             return result;
         }, {});
+
         let xArray = [];
         let yArray = [];
+        
         for (let i = 0; i < 5; i++) {
             let x = currentWeek - i;
             if (x < 1) {
@@ -112,13 +114,13 @@ export function ProfileScreen({ navigation, route }) {
     return (
         <View style={{
             flex: 1,
-            backgroundColor: '#edeaea',
+            backgroundColor: '#121111',
         }}>
             <ScrollView style={{
                 flex: 1,
             }}>
                 {/* Top half */}
-                <ProfileDetailsHeader user={user} />
+                <ProfileDetailsHeader user={user} numberOfTimes={weeklyData}/>
 
                 {/* Bottom half */}
 
@@ -134,8 +136,8 @@ export function ProfileScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        backgroundColor: 'floralwhite',
-        borderRadius: 30,
+        backgroundColor: '#121111',
+        //borderRadius: 30,
         height: 250,
         marginLeft: 5,
         marginRight: 5,
