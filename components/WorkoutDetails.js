@@ -149,7 +149,7 @@ export function WorkoutDetails({ navigation, route }) {
                         <Button buttonStyle={Styles.green} title={running ? 'Stop' : 'Start'} onPress={() => { startAndStop() }} />
                     </View>
                     <View style={{ flex: 1, margin: 10, marginLeft: 2 }}>
-                        <Button buttonStyle={Styles.green} onPress={() => { navigation.navigate('addExercise', { userid: workout.wor_usr_id, workoutid: workout.id }) }} title='Add exercise' />
+                        <Button buttonStyle={Styles.green} onPress={() => { navigation.navigate('addExercise', { userId: workout.wor_usr_id, workoutId: workout.id }) }} title='Add exercise' />
                     </View>
                 </View>
                 <View style={{ position: 'absolute', width: '100%', bottom: 0 }}>

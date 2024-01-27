@@ -100,6 +100,17 @@ async function addWorkoutWithExercises(workoutName, selectedExercises, usrToken)
     }
 }
 
+const attachToWorkout = async (exerciseId, workoutId) => {
+    try {
+        await addDoc(collection(db, 'Workout', workoutId, 'workout_exercise'), {
+            woe_exercise: exerciseId
+        });
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
 async function addWorkout(name, usrToken) {
     try {
         const documentData = {
@@ -132,5 +143,6 @@ module.exports = {
     removeWorkout: removeWorkout,
     getWorkouts: getWorkouts,
     getFirebaseTimeStamp: getFirebaseTimeStamp,
-    getDefaultWorkouts: getDefaultWorkouts
+    getDefaultWorkouts: getDefaultWorkouts,
+    attachToWorkout: attachToWorkout
 };

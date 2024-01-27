@@ -47,7 +47,7 @@ export function CustomExerciseView({ userid, childToParent }) {
                                 data.map((item, i) => {
                                     return (<View>
                                         <TouchableOpacity onPress={() => { addSelectedExercise(item.id) }}>
-                                            <Card key={i} containerStyle={[{ marginHorizontal: 5, borderWidth: 0, borderBottomColor: '#CDCD55', borderBottomWidth: 1, padding: 15,backgroundColor: Styles.lessDark.backgroundColor },
+                                            <Card key={i} containerStyle={[Styles.smallCard,
                                             selectedExercises.includes(item.id) ? selectedStyle.active : selectedStyle.inactive]}>
                                                 <Text style={{...Styles.detailText, margin: 0}}>{item.exe_name}</Text>
                                             </Card>

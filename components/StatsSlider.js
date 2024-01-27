@@ -92,12 +92,12 @@ const StatsSlider = ({ sliderComponent, stats }) => {
 const styles = StyleSheet.create({
     cardContainer: {
         backgroundColor: '#1c1a1a',
-        //borderRadius: 30,
+        borderRadius: 30,
         height: 250,
-        marginLeft: 5,
-        elevation: 5,
+        marginLeft: 8,
+        elevation: 2,
         marginBottom: 3,
-        marginRight: 5,
+        marginRight: 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
