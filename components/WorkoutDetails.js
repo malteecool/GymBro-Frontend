@@ -1,14 +1,13 @@
 import { useEffect } from "react";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Button } from "react-native-elements";
 import { Card } from "react-native-elements";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import emitter from "./customEventEmitter";
 import { removeWorkoutExercise as removeWorkoutExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService';
-import { getWorkoutExercises, updateWorkout, getFormattedTime } from '../services/WorkoutService';
+import { getWorkoutExercises, updateWorkout, getFormattedTime, updateWorkoutExerciseOrdinal } from '../services/WorkoutService';
 import Styles from "../Styles";
-
 
 export function WorkoutDetails({ navigation, route }) {
 
@@ -18,6 +17,7 @@ export function WorkoutDetails({ navigation, route }) {
     const [time, setTime] = useState(0);
     const [startTime, setStartTime] = useState(0);
     const [intervalTime, setIntervalTime] = useState(0);
+    const [edit, setEdit] = useState(false);
 
     const workout = route.params.workout;
 
@@ -37,6 +37,35 @@ export function WorkoutDetails({ navigation, route }) {
         load();
     }, []);
 
+
+    const moveExerciseForward = (exerciseIndex) => {
+        if (exerciseIndex < data.length - 1) {
+            const exerciseList = [...data];
+            [exerciseList[exerciseIndex], exerciseList[exerciseIndex + 1]] = [exerciseList[exerciseIndex + 1], exerciseList[exerciseIndex]];
+            updateExercisePosition(exerciseList);
+            setData(exerciseList);
+        }
+    }
+
+    const moveExerciseBackwards = (exerciseIndex) => {
+        if (exerciseIndex > 0) {
+            const exerciseList = [...data];
+            [exerciseList[exerciseIndex], exerciseList[exerciseIndex - 1]] = [exerciseList[exerciseIndex - 1], exerciseList[exerciseIndex]];
+            updateExercisePosition(exerciseList);
+            setData(exerciseList);
+
+        }
+    }
+
+    const updateExercisePosition = async (exerciseList) => {
+        console.log('Updating exercise position');
+        if (exerciseList) {
+            exerciseList.forEach((exercise, index) => {
+                updateWorkoutExerciseOrdinal(workout.id, exercise.woe_id, index);
+            });
+        }
+
+    }
 
     const saveWorkout = async () => {
         try {
@@ -65,7 +94,20 @@ export function WorkoutDetails({ navigation, route }) {
         finally {
             load();
         }
+
     };
+
+    const warnUser = (exercise) => {
+        Alert.alert('Remove exercise', 'Are you sure you want to delete exercise ' + exercise.exe_name + '?', [
+            {
+                text: 'Cancel',
+                onPress: () => { return; },
+                style: 'cancel',
+            },
+            { text: 'OK', onPress: () => removeWorkoutExercise(exercise.exe_id) },
+        ]);
+    }
+
 
     useEffect(() => {
         const listener = (data) => {
@@ -89,7 +131,12 @@ export function WorkoutDetails({ navigation, route }) {
             }, 1000);
         }
         navigation.setOptions({
-            title: `${workout.wor_name}: ${getFormattedTime(time)}`
+            headerTitle: () => (
+                <View style={{ paddingBottom: 8 }}>
+                    <Text style={{ fontSize: 24, fontWeight: 'bold', ...Styles.fontColor }}>{workout.wor_name}</Text>
+                    <Text style={{ fontSize: 18, color: 'gray' }}>{getFormattedTime(time)}</Text>
+                </View>
+            ),
         });
 
         return () => clearInterval(intervalId);
@@ -118,18 +165,32 @@ export function WorkoutDetails({ navigation, route }) {
                             return (
                                 <TouchableOpacity key={workout.exe_name} onPress={() => { navigation.navigate('exerciseDetailsWorkout', { exercise: workout }) }}>
                                     <Card key={i} containerStyle={Styles.card}>
-                                        <View style={Styles.header}>
-                                            <Card.Title style={Styles.cardTitle}>{workout.exe_name}</Card.Title>
-                                            <TouchableOpacity onPress={() => removeWorkoutExercise(workout.id)} style={Styles.trashIcon}>
-                                                <MaterialCommunityIcons name="trash-can-outline" size={22} color={Styles.yellow.backgroundColor} />
-                                            </TouchableOpacity>
 
-                                        </View>
-                                        <Card.Divider color={Styles.yellow.backgroundColor}></Card.Divider>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <View>
+                                                <Text style={Styles.cardTitle}>
+                                                    {workout.exe_name}
+                                                </Text>
+                                                <Text style={{ ...Styles.fontColor, marginLeft: 10 }}>
+                                                    <MaterialCommunityIcons name='weight-kilogram' size={16} style={Styles.icon} />{' ' + workout.exe_max_weight + '  '}
+                                                    <MaterialCommunityIcons name='calendar-range' size={16} style={Styles.icon} />{' ' + (workout.exe_date !== null ? exerciseDate.toDateString() : 'never')}
+                                                </Text>
+                                            </View>
+                                            <View style={{ flex: 1, alignItems: 'flex-end' }}>{
+                                                !edit ? (<TouchableOpacity onPress={() => setEdit(true)} ><MaterialCommunityIcons name='pencil' size={25} style={Styles.icon} /></TouchableOpacity>) :
+                                                    (<View style={{ flexDirection: "row" }}>
+                                                        <View style={{marginRight: 5}}>
+                                                            <TouchableOpacity onPress={() => { moveExerciseBackwards(i) }}><MaterialCommunityIcons name='arrow-up' size={25} style={Styles.icon} /></TouchableOpacity>
+                                                            <TouchableOpacity onPress={() => { moveExerciseForward(i) }}><MaterialCommunityIcons name='arrow-down' size={25} style={Styles.icon} /></TouchableOpacity>
+                                                        </View>
+                                                        <View>
+                                                            <TouchableOpacity onPress={() => { warnUser(workout) }}><MaterialCommunityIcons name='trash-can-outline' size={25} style={Styles.icon} /></TouchableOpacity>
+                                                            <TouchableOpacity onPress={() => { setEdit(false) }}><MaterialCommunityIcons name='window-close' size={25} style={Styles.icon} /></TouchableOpacity>
+                                                        </View>
+                                                    </View>
+                                                    )
+                                            }</View>
 
-                                        <View style={Styles.details}>
-                                            <Text style={Styles.detailText}><MaterialCommunityIcons name='weight-kilogram' size={16} style={Styles.icon} />{' ' + workout.exe_max_weight}</Text>
-                                            <Text style={Styles.detailText}><MaterialCommunityIcons name='calendar-range' size={16} style={Styles.icon} />{' ' + (workout.exe_date !== null ? exerciseDate.toDateString() : 'never')}</Text>
                                         </View>
                                     </Card>
                                 </TouchableOpacity>)
@@ -155,7 +216,7 @@ export function WorkoutDetails({ navigation, route }) {
                 <View style={{ position: 'absolute', width: '100%', bottom: 0 }}>
                     <Button disabled={time <= 0} title='Complete' buttonStyle={{ margin: 10, ...Styles.green }} onPress={() => { saveWorkout() }} />
                 </View>
-            </View>
+            </View >
         )
         }
         </View >

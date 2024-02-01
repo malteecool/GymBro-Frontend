@@ -24,7 +24,8 @@ export default StyleSheet.create({
         borderWidth: 0, 
         borderBottomColor: '#CDCD55', 
         borderBottomWidth: 1, 
-        padding: 15,
+        padding: 10,
+        paddingLeft: 20,
         backgroundColor: '#1c1a1a',
         borderRadius: 5
     },
@@ -34,9 +35,9 @@ export default StyleSheet.create({
         marginRight: 5,
         borderWidth: 0,
         marginBottom: 0,
-        borderRadius: 30,
+        borderRadius: 10,
         overflow: 'hidden',
-        elevation: 5,
+        //elevation: 5,
         backgroundColor: '#1c1a1a'
     },
     header: {
@@ -44,7 +45,7 @@ export default StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 10,
-        paddingBottom: 0,
+        
         backgroundColor: '#121111',
     },
     cardTitle: {
@@ -52,11 +53,12 @@ export default StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginLeft: 10,
+        marginBottom: 5,
     },
     trashIcon: {
         padding: 5,
-        marginBottom: 15,
-        marginRight: 15
+        //marginBottom: 15,
+        //marginRight: 15
     },
     details: {
         padding: 0,
@@ -66,7 +68,7 @@ export default StyleSheet.create({
     detailText: {
         color: '#E5E3D4',
         fontSize: 18,
-        marginBottom: 8,
+        paddingVertical: 10
     },
     icon: {
         color: '#E5E3D4',

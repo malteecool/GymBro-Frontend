@@ -1,7 +1,7 @@
 import { Text, View, ActivityIndicator, StatusBar } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, transitionSpec } from '@react-navigation/native-stack';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Button } from 'react-native-elements';
@@ -16,9 +16,10 @@ import { ExcerciseScreen } from './components/ExerciseScreen';
 import { WorkoutScreen } from './components/WorkoutScreen';
 import { WorkoutDetails } from './components/WorkoutDetails';
 import { ProfileScreen } from './components/ProfileScreen';
+import { SplitScreen } from './components/SplitScreen';
 import emitter from "./components/customEventEmitter";
 import { AddWorkout } from './components/AddWorkout';
-import { userExist, getUserData, addUser, logout } from './services/UserService';
+import { getUserData } from './services/UserService';
 import Styles from './Styles';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -26,30 +27,52 @@ WebBrowser.maybeCompleteAuthSession();
 const Stack = createNativeStackNavigator();
 
 function ExerciseStackScreen(userInfo) {
+
+    const config = {
+        animation: 'timing',
+        config: {
+            duration: 1000,
+            easing: 1000
+        },
+    };
+
     return (
         <Stack.Navigator>
             <Stack.Screen name='excercises'
                 component={ExcerciseScreen}
                 initialParams={{ userInfo: userInfo }}
-                options={{ headerShown: false }} />
+                options={{
+                    headerShown: false
+                }} />
             <Stack.Screen name='exerciseDetails' component={ExerciseDetails} options={({ route }) => ({
                 title: route.params.exercise.exe_name,
                 headerStyle: Styles.lessDark,
                 headerTitleStyle: Styles.fontColor,
-                headerTintColor: Styles.fontColor.color
+                headerTintColor: Styles.fontColor.color,
+                transitionSpec: {
+                    open: config,
+                    close: config,
+                },
             })} />
             <Stack.Screen name='addExercise' component={AddExercise} options={({ route }) => ({
                 title: 'New exercise',
                 headerStyle: Styles.lessDark,
                 headerTitleStyle: Styles.fontColor,
-                headerTintColor: Styles.fontColor.color
+                headerTintColor: Styles.fontColor.color,
+                transitionSpec: {
+                    open: config,
+                    close: config,
+                }
             })} />
             <Stack.Screen name='addSet' component={AddSet} options={({ route }) => ({
                 title: route.params.exercise.exe_name,
                 headerStyle: Styles.lessDark,
                 headerTitleStyle: Styles.fontColor,
                 headerTintColor: Styles.fontColor.color,
-
+                transitionSpec: {
+                    open: config,
+                    close: config,
+                }
             })} />
         </Stack.Navigator>
     )
@@ -100,6 +123,15 @@ function ProfileStackScreen(userInfo) {
         </Stack.Navigator>
     )
 }
+
+function SplitStackScreen(userInfo) {
+    return (
+        <Stack.Navigator>
+            <Stack.Screen name='split' component={SplitScreen} initialParams={{ userInfo: userInfo }} options={{ headerShown: false }} />
+        </Stack.Navigator>
+    )
+}
+
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -158,10 +190,6 @@ export default function App() {
                 setRequireRefresh(!isTokenFresh);
                 const userData = await getUserData(authFromJson);
                 if (userData.id) {
-                    /*const dbUser = await userExist(userData.id);
-                    if (dbUser == null) {
-                        const newUser = await addUser(userData);
-                    }*/
                     setUserInfo(userData);
                 } else if (userData.error?.code == 401) {
                     console.log("refreshing token");
@@ -239,7 +267,7 @@ export default function App() {
                                 tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='weight-lifter' color={color} size={26} />)
                             }}
                             listeners={{ tabPress: () => { updateWorkoutEmitter() } }} />
-
+                        
                     </Tab.Navigator>
 
                 ) : (

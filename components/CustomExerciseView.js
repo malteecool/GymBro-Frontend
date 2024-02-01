@@ -24,11 +24,14 @@ export function CustomExerciseView({ userid, childToParent }) {
         childToParent(selectedExercises);
     });
 
+    let start = 0;
+
     const addSelectedExercise = (id) => {
-        if (!selectedExercises.includes(id)) {
-            setSelectedExercises(selectedExercises => [...selectedExercises, id]);
+        if (!selectedExercises.map(x => x.id).includes(id)) {
+            setSelectedExercises(selectedExercises => [...selectedExercises, { id: id, ordinal: selectedExercises.length }]);
+            start = start + 1;
         } else {
-            setSelectedExercises(selectedExercises.filter(item => item !== id));
+            setSelectedExercises(selectedExercises.filter(item => item["id"] !== id));
         }
     }
 
@@ -42,14 +45,14 @@ export function CustomExerciseView({ userid, childToParent }) {
             {
                 isLoading ? <ActivityIndicator style={Styles.activityIndicator} /> :
                     (
-                        <ScrollView contentContainerStyle={{paddingBottom: 75, backgroundColor: Styles.dark.backgroundColor, borderTopLeftRadius: 6, borderTopRightRadius: 6}}>
+                        <ScrollView contentContainerStyle={{ paddingBottom: 75, backgroundColor: Styles.dark.backgroundColor, borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
                             {
                                 data.map((item, i) => {
-                                    return (<View>
+                                    return (<View key={i}>
                                         <TouchableOpacity onPress={() => { addSelectedExercise(item.id) }}>
                                             <Card key={i} containerStyle={[Styles.smallCard,
-                                            selectedExercises.includes(item.id) ? selectedStyle.active : selectedStyle.inactive]}>
-                                                <Text style={{...Styles.detailText, margin: 0}}>{item.exe_name}</Text>
+                                            selectedExercises.map(x => x.id).includes(item.id) ? selectedStyle.active : selectedStyle.inactive]}>
+                                                <Text style={{ ...Styles.detailText, margin: 0 }}>{item.exe_name}</Text>
                                             </Card>
                                         </TouchableOpacity>
                                     </View>)

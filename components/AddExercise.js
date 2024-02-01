@@ -18,10 +18,9 @@ export function AddExercise({ navigation, route }) {
 
     const onAddExercise = async (name, exerciseId) => {
         try {
-            console.log(userId);
             setLoading(true);
             if (workoutId && exerciseId) {
-                await attachToWorkout(exerciseId, workoutId);
+                await attachToWorkout(exerciseId, workoutId, masterDataSource.length);
             } else {
                 await addExercise(name, userId);
             }

@@ -49,20 +49,25 @@ async function updateWorkout(workout, timer) {
 }
 
 async function getWorkoutExercises(workoutId) {
-    console.log("workout id => " + workoutId);
     const exercises = query(collection(db, 'Workout', workoutId, 'workout_exercise'));
     const docSnap = await getDocs(exercises);
     var documentData = [];
     // iterate each exercise
     for (const exerciseDoc of docSnap.docs) {
-        const exerciseId = await exerciseDoc.data().woe_exercise;
-        const docRef = doc(db, "Exercise", exerciseId);
+        const exerciseData = exerciseDoc.data();
+        const docRef = doc(db, "Exercise", exerciseData.woe_exercise);
         var exercise = await getDoc(docRef);
-        exercise = { id: exercise.id, ...exercise.data() };
-        console.log(exercise);
+        exercise = { woe_id: exerciseDoc.id, id: exercise.id, ordinal: exerciseData.woe_ordinal, ...exercise.data() };
         documentData.push(exercise);
     }
+    documentData.sort((a,b) => a.ordinal >= b.ordinal);
     return documentData;
+}
+
+async function updateWorkoutExerciseOrdinal(wor_id, woe_id, ordinal) {
+    await updateDoc(doc(db, 'Workout', wor_id, 'workout_exercise', woe_id), {
+        woe_ordinal: ordinal
+    });
 }
 
 async function getDefaultWorkouts() {
@@ -72,7 +77,7 @@ async function getDefaultWorkouts() {
     const docSnap = await getDocs(q);
     const docDataArray = [];
     await docSnap.forEach(async (doc) => {
-        const docData = await doc.data();
+        const docData = doc.data();
         docDataArray.push(docData);
     });
     return docDataArray;
@@ -87,11 +92,15 @@ const getFormattedTime = (time) => {
 
 async function addWorkoutWithExercises(workoutName, selectedExercises, usrToken) {
     try {
-        console.log(usrToken);
         const workoutId = await addWorkout(workoutName, usrToken);
-        for (const exericseId of selectedExercises) {
+        for (const exercise of selectedExercises) {
+            console.log(exercise);
+            console.log(exercise.id);
+            console.log(exercise.ordinal);
+            
             const docRef = await addDoc(collection(db, 'Workout', workoutId, 'workout_exercise'), {
-                woe_exercise: exericseId
+                woe_exercise: exercise.id,
+                woe_ordinal: exercise.ordinal
             });
         }
         emitter.emit('workoutEvent', 0);
@@ -100,10 +109,11 @@ async function addWorkoutWithExercises(workoutName, selectedExercises, usrToken)
     }
 }
 
-const attachToWorkout = async (exerciseId, workoutId) => {
+const attachToWorkout = async (exerciseId, workoutId, ordinal) => {
     try {
         await addDoc(collection(db, 'Workout', workoutId, 'workout_exercise'), {
-            woe_exercise: exerciseId
+            woe_exercise: exerciseId,
+            woe_ordinal: ordinal
         });
     }
     catch (error) {
@@ -144,5 +154,6 @@ module.exports = {
     getWorkouts: getWorkouts,
     getFirebaseTimeStamp: getFirebaseTimeStamp,
     getDefaultWorkouts: getDefaultWorkouts,
-    attachToWorkout: attachToWorkout
+    attachToWorkout: attachToWorkout,
+    updateWorkoutExerciseOrdinal: updateWorkoutExerciseOrdinal
 };

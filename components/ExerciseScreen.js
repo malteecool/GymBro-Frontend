@@ -39,6 +39,7 @@ export function ExcerciseScreen({ navigation, route }) {
 
     const removeExercise = async (exe_id) => {
         try {
+            setLoading(true);
             await removeExerciseService(exe_id, user.id);
         }
         catch (error) {
@@ -75,7 +76,7 @@ export function ExcerciseScreen({ navigation, route }) {
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         const listener = (data) => {
             load();
         };
@@ -110,19 +111,23 @@ export function ExcerciseScreen({ navigation, route }) {
                         var exerciseDate = getFirebaseTimeStamp(item.exe_date.seconds, item.exe_date.nanoseconds);
 
                         return (
-                            <TouchableOpacity key={i} onPress={() => { navigation.navigate('exerciseDetails', { exercise: item }) }}>
+                            <TouchableOpacity key={i} onPress={() => { navigation.navigate('exerciseDetails', { exercise: item },) }}>
                                 <Card containerStyle={Styles.card}>
-                                    <View style={Styles.header}>
-                                        <Card.Title style={Styles.cardTitle}><Text>{item.exe_name}</Text></Card.Title>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <View>
+                                            <Text style={Styles.cardTitle}>
+                                                {item.exe_name}
+                                            </Text>
+                                            <Text style={{ ...Styles.fontColor, marginLeft: 10 }}>
+                                                <MaterialCommunityIcons style={{ ...Styles.icon, paddingRight: 10 }} name='weight-kilogram' size={16} />
+                                                {' ' + item.exe_max_weight + '  '}
+                                                <MaterialCommunityIcons style={Styles.icon} name='calendar-range' size={16} />
+                                                {' ' + (item.exe_date !== null ? exerciseDate.toDateString() : "Never")}
+                                            </Text>
+                                        </View>
                                         <TouchableOpacity onPress={() => removeExercise(item.id)} style={Styles.trashIcon}>
-                                            <MaterialCommunityIcons name="trash-can-outline" size={22} color={Styles.yellow.backgroundColor} />
+                                            <MaterialCommunityIcons name="trash-can-outline" size={20} style={Styles.icon} />
                                         </TouchableOpacity>
-                                    </View>
-                                    <Card.Divider color={Styles.yellow.backgroundColor}></Card.Divider>
-                                    
-                                    <View style={Styles.details}>
-                                        <Text style={Styles.detailText}><MaterialCommunityIcons style={Styles.icon} name='weight-kilogram' size={20} />{' ' + item.exe_max_weight}</Text>
-                                        <Text style={Styles.detailText}><MaterialCommunityIcons style={Styles.icon} name='calendar-range' size={20} />{' ' + (item.exe_date !== null ? exerciseDate.toDateString() : "Never")}</Text>
                                     </View>
                                 </Card>
                             </TouchableOpacity>
