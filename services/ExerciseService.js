@@ -14,9 +14,7 @@ async function getExercises(usr_id) {
             var exerciseDoc = { "id": doc.id, ...doc.data() };
             documentData.push(exerciseDoc);
         }
-
         documentData.sort((a, b) => a.exe_date <= b.exe_date);
-
     }
     catch (error) {
         console.error(error)
@@ -71,6 +69,7 @@ async function getHistory(exerciseId, date) {
     }
     return documentData;
 };
+  
 
 async function getHistoryByUser(userId) {
     var documentData = [];
@@ -176,5 +175,5 @@ module.exports = {
     updateExerciseMaxWeight: updateExerciseMaxWeight,
     getDefaultExercises: getDefaultExercises,
     getHistoryByUser: getHistoryByUser,
-    addExercise: addExercise
+    addExercise: addExercise,
 };

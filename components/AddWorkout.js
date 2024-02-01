@@ -20,7 +20,6 @@ export function AddWorkout({ navigation, route }) {
     const userid = route.params.userid;
 
     const childToParent = (childData) => {
-        console.log(childData);
         setSelectedExercises(childData);
     }
 
@@ -109,8 +108,8 @@ export function AddWorkout({ navigation, route }) {
                                         filteredDataSource.length > 0 ? (
                                             filteredDataSource.map((item, i) => {
                                                 return (
-                                                    <TouchableOpacity onPress={() => onAddWorkout(item.def_name)}>
-                                                        <Card key={i} containerStyle={ Styles.smallCard }>
+                                                    <TouchableOpacity  key={i} onPress={() => onAddWorkout(item.def_name)}>
+                                                        <Card containerStyle={Styles.smallCard}>
                                                             <Text style={{ ...Styles.detailText, margin: 0 }}>{item.def_name}</Text>
                                                         </Card>
                                                     </TouchableOpacity>
@@ -118,7 +117,7 @@ export function AddWorkout({ navigation, route }) {
                                             })) :
                                             (
                                                 <TouchableOpacity onPress={() => onAddWorkout(search, 0)}>
-                                                    <Card containerStyle={ Styles.smallCard }>
+                                                    <Card containerStyle={Styles.smallCard}>
                                                         <Text style={{ ...Styles.detailText, margin: 0 }} >Nothing found, add: {search}</Text>
                                                     </Card>
                                                 </TouchableOpacity>
@@ -154,7 +153,7 @@ export function AddWorkout({ navigation, route }) {
                             </View>
                         </View>
                         <View style={{ position: 'absolute', width: '100%', bottom: 10 }}>
-                            <Button disabled={workoutName.length <= 0} title='Create' titleStyle={{fontSize: 18}} buttonStyle={{ margin: 10, backgroundColor: Styles.green.backgroundColor }} onPress={() => { onAddWorkout(workoutName) }} />
+                            <Button disabled={workoutName.length <= 0} title='Create' titleStyle={{ fontSize: 18 }} buttonStyle={{ margin: 10, backgroundColor: Styles.green.backgroundColor }} onPress={() => { onAddWorkout(workoutName) }} />
                         </View>
                     </View>
                 );
@@ -167,12 +166,12 @@ export function AddWorkout({ navigation, route }) {
                 swipeEnabled={true}
                 renderTabBar={props => <TabBar
                     {...props}
-                    style={Styles.green }
-                    renderLabel={({route, color}) => (
+                    style={Styles.green}
+                    renderLabel={({ route, color }) => (
                         <Text style={{ fontSize: 18, ...Styles.fontColor }}>
-                          {route.title}
+                            {route.title}
                         </Text>
-                      )}
+                    )}
                 />}
                 navigationState={{ index, routes }}
                 renderScene={renderTabs}
