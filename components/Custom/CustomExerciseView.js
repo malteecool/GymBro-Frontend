@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { getExercises } from "../services/ExerciseService";
+import { getExercises } from "../../services/ExerciseService";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
 import { Card } from "react-native-elements";
-import Styles from "../Styles";
+import Styles from "../../Styles";
 
 export function CustomExerciseView({ userid, childToParent }) {
     const [data, setData] = useState([]);

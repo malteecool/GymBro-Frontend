@@ -1,15 +1,17 @@
 import { useEffect } from "react";
 import { useState } from "react";
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Animated, Easing, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Button } from "react-native-elements";
 import { Card } from "react-native-elements";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import emitter from "./customEventEmitter";
-import { removeWorkoutExercise as removeWorkoutExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService';
-import { getWorkoutExercises, updateWorkout, getFormattedTime, updateWorkoutExerciseOrdinal } from '../services/WorkoutService';
-import Styles from "../Styles";
+import emitter from "../Custom/CustomEventEmitter";
+import { removeWorkoutExercise as removeWorkoutExerciseService, getFirebaseTimeStamp } from '../../services/ExerciseService';
+import { getWorkoutExercises, updateWorkout, getFormattedTime, updateWorkoutExerciseOrdinal } from '../../services/WorkoutService';
+import Styles from "../../Styles";
 
 export function WorkoutDetails({ navigation, route }) {
+
+    const workout = route.params.workout;
 
     const [running, setRunning] = useState(false);
     const [isLoading, setLoading] = useState(true);
@@ -19,7 +21,6 @@ export function WorkoutDetails({ navigation, route }) {
     const [intervalTime, setIntervalTime] = useState(0);
     const [edit, setEdit] = useState(false);
 
-    const workout = route.params.workout;
 
     const load = async () => {
         try {
@@ -151,6 +152,31 @@ export function WorkoutDetails({ navigation, route }) {
         }
         setRunning(!running);
     };
+
+    const opacity = useState(new Animated.Value(0))[0];
+
+    const openEdit = () => {
+        if (!edit) {
+            Animated.timing(opacity, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: false,
+            }).start(setEdit(!edit));
+        } else {
+            Animated.timing(opacity, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: false,
+            }).start(setEdit(!edit));
+        }
+    
+    };
+
+    const size = opacity.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, 80],
+    });
+
     return (
         <View style={{ flex: 1, backgroundColor: '#121111' }}>{isLoading ? (
             <View style={Styles.activityIndicator}>
@@ -176,20 +202,23 @@ export function WorkoutDetails({ navigation, route }) {
                                                     <MaterialCommunityIcons name='calendar-range' size={16} style={Styles.icon} />{' ' + (workout.exe_date !== null ? exerciseDate.toDateString() : 'never')}
                                                 </Text>
                                             </View>
-                                            <View style={{ flex: 1, alignItems: 'flex-end' }}>{
-                                                !edit ? (<TouchableOpacity onPress={() => setEdit(true)} ><MaterialCommunityIcons name='pencil' size={25} style={Styles.icon} /></TouchableOpacity>) :
-                                                    (<View style={{ flexDirection: "row" }}>
-                                                        <View style={{marginRight: 5}}>
-                                                            <TouchableOpacity onPress={() => { moveExerciseBackwards(i) }}><MaterialCommunityIcons name='arrow-up' size={25} style={Styles.icon} /></TouchableOpacity>
-                                                            <TouchableOpacity onPress={() => { moveExerciseForward(i) }}><MaterialCommunityIcons name='arrow-down' size={25} style={Styles.icon} /></TouchableOpacity>
-                                                        </View>
-                                                        <View>
-                                                            <TouchableOpacity onPress={() => { warnUser(workout) }}><MaterialCommunityIcons name='trash-can-outline' size={25} style={Styles.icon} /></TouchableOpacity>
-                                                            <TouchableOpacity onPress={() => { setEdit(false) }}><MaterialCommunityIcons name='window-close' size={25} style={Styles.icon} /></TouchableOpacity>
-                                                        </View>
-                                                    </View>
-                                                    )
-                                            }</View>
+                                            <View style={{ flex: 1, alignItems: 'flex-end', marginRight: 15 }}>
+                                                <View style={{ flexDirection: 'row' }}>
+                                                    <Animated.View style={{
+                                                        opacity,
+                                                        width: size,
+                                                        flexDirection: 'row'
+                                                    }}>
+                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { warnUser(workout) }}><MaterialCommunityIcons name='trash-can-outline' size={20} style={Styles.icon} /></TouchableOpacity>
+                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { moveExerciseBackwards(i) }}><MaterialCommunityIcons name='arrow-up' size={20} style={Styles.icon} /></TouchableOpacity>
+                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { moveExerciseForward(i) }}><MaterialCommunityIcons name='arrow-down' size={20} style={Styles.icon} /></TouchableOpacity>
+                                                    </Animated.View>
+                                                    <TouchableOpacity
+                                                        onPress={() => { openEdit() }}>
+                                                        {!edit ? <MaterialCommunityIcons name='pencil' size={20} style={Styles.icon} /> : <MaterialCommunityIcons name='window-close' size={20} style={Styles.icon} />}
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
 
                                         </View>
                                     </Card>

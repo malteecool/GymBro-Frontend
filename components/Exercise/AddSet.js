@@ -2,10 +2,10 @@ import { View, ScrollView } from 'react-native';
 import React, { useState } from 'react';
 import { Button } from 'react-native-elements';
 import { ActivityIndicator } from 'react-native-paper';
-import { Card2 } from './customCard';
-import emitter from './customEventEmitter';
-import { postExercise } from '../services/SetService';
-import Styles from '../Styles';
+import { Card2 } from '../Custom/CustomCard';
+import emitter from '../Custom/CustomEventEmitter';
+import { postExercise } from '../../services/SetService';
+import Styles from '../../Styles';
 
 export function AddSet({ navigation, route }) {
 

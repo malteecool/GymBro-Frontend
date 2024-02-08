@@ -18,7 +18,6 @@ async function getWorkoutsCount(user) {
     return { lifetime: uniqueDates, weekly: weeklyDates };
 }
 
-// GPT generated.
 function getWeekNumber(date) {
     const target = new Date(date);
     target.setHours(0, 0, 0, 0);

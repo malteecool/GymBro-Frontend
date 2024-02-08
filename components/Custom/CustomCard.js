@@ -1,7 +1,7 @@
 import React, { Component, useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Card, Divider } from 'react-native-elements';
-import Styles from '../Styles';
+import Styles from '../../Styles';
 
 export function Card2({ historyId, childToParent }) {
     const [sets, setSets] = useState([{ set_weight: 0, set_reps: 0 }]);
