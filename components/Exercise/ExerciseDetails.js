@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 import { Card, Button, Divider } from 'react-native-elements'
 import { ActivityIndicator } from 'react-native-paper';
-import emitter from './customEventEmitter';
-import { getHistory, getFirebaseTimeStamp } from '../services/ExerciseService'
-import Styles from '../Styles';
+import emitter from '../Custom/CustomEventEmitter';
+import { getHistory, getFirebaseTimeStamp } from '../../services/ExerciseService'
+import Styles from '../../Styles';
 
 
 const LABEL_WEIGHT = "WEIGHT";

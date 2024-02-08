@@ -2,9 +2,9 @@ import { Text, View, ActivityIndicator, TouchableOpacity, ScrollView, TextInput,
 import React, { useEffect, useState } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Card, Button } from 'react-native-elements';
-import emitter from './customEventEmitter';
-import { getExercises, removeExercise as removeExerciseService, getFirebaseTimeStamp } from '../services/ExerciseService';
-import Styles from '../Styles';
+import emitter from '../Custom/CustomEventEmitter';
+import { getExercises, removeExercise as removeExerciseService, getFirebaseTimeStamp } from '../../services/ExerciseService';
+import Styles from '../../Styles';
 
 
 export function ExcerciseScreen({ navigation, route }) {

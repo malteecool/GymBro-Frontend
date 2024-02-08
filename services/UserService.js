@@ -19,8 +19,7 @@ async function userExist(id) {
     const docSnap = await getDocs(q);
 
     //return first user found.
-    const docData = await docSnap.docs[0].data();
-    console.log('docData => ' + docData);
+    const docData = docSnap.docs[0].data();
     return docData;
 }
 

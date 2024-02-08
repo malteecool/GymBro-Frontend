@@ -1,5 +1,5 @@
 import { db } from "../firebaseConfig";
-import emitter from "../components/customEventEmitter";
+import emitter from "../components/Custom/CustomEventEmitter";
 import { collection, query, getDocs, where, Timestamp, getDoc, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
 
 
