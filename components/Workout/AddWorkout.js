@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { View, TextInput, ScrollView, Text, ActivityIndicator, TouchableOpacity, StyleSheet } from "react-native";
 import { Button, Card } from "react-native-elements";
 import { TabView, TabBar } from 'react-native-tab-view';
-import CustomExerciseView from "./CustomExerciseView";
-import emitter from "./customEventEmitter";
-import { addWorkout, addWorkoutWithExercises, getDefaultWorkouts } from '../services/WorkoutService';
-import Styles from "../Styles";
+import CustomExerciseView from "../Custom/CustomExerciseView";
+import emitter from "../Custom/CustomEventEmitter";
+import { addWorkout, addWorkoutWithExercises, getDefaultWorkouts } from '../../services/WorkoutService';
+import Styles from "../../Styles";
 
 export function AddWorkout({ navigation, route }) {
     const [isLoading, setLoading] = useState(false);
@@ -108,7 +108,7 @@ export function AddWorkout({ navigation, route }) {
                                         filteredDataSource.length > 0 ? (
                                             filteredDataSource.map((item, i) => {
                                                 return (
-                                                    <TouchableOpacity  key={i} onPress={() => onAddWorkout(item.def_name)}>
+                                                    <TouchableOpacity key={i} onPress={() => onAddWorkout(item.def_name)}>
                                                         <Card containerStyle={Styles.smallCard}>
                                                             <Text style={{ ...Styles.detailText, margin: 0 }}>{item.def_name}</Text>
                                                         </Card>

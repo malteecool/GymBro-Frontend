@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Text, ActivityIndicator } from "react-native";
-import { getWorkoutsCount } from '../services/StatsService';
-import Styles from "../Styles";
+import { getWorkoutsCount } from '../../services/StatsService';
+import Styles from "../../Styles";
 
 export function ProfileDetailsHeader({ user, numberOfTimes}) {
 
@@ -42,7 +42,7 @@ export function ProfileDetailsHeader({ user, numberOfTimes}) {
                 <Text style={{...Styles.oswaldBold}}>
                 YOU'VE BEEN TO THE GYM 
                 {!numberOfTimes ? (<ActivityIndicator size="large"/>) : (<Text style={{...Styles.oswaldBold, color: '#0C7C59'}}> {numberOfTimes[0].count} </Text>)}
-                {numberOfTimes && numberOfTimes[0].count > 1 ? ( <Text style={{...Styles.oswaldBold, color: '#0C7C59'}}>TIMES </Text>) : <Text style={{...Styles.oswaldBold, color: '#0C7C59'}}>TIME </Text>}
+                {numberOfTimes && (numberOfTimes[0].count > 1 || numberOfTimes[0].count == 0) ? ( <Text style={{...Styles.oswaldBold, color: '#0C7C59'}}>TIMES </Text>) : <Text style={{...Styles.oswaldBold, color: '#0C7C59'}}>TIME </Text>}
                 THIS WEEK, KEEP GOING!
                 </Text>
                 </TouchableOpacity>

@@ -1,26 +1,28 @@
-import { Text, View, ActivityIndicator, StatusBar } from 'react-native';
+import { Text, View, ActivityIndicator, StatusBar, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator, transitionSpec } from '@react-navigation/native-stack';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Button } from 'react-native-elements';
-import { ExerciseDetails } from './components/ExerciseDetails';
-import { AddExercise } from './components/AddExercise';
-import { AddSet } from './components/AddSet';
+import { ExerciseDetails } from './components/Exercise/ExerciseDetails';
+import { AddExercise } from './components/Exercise/AddExercise';
+import { AddSet } from './components/Exercise/AddSet';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { AsyncStorage } from 'react-native';
 import * as AuthSession from 'expo-auth-session';
-import { ExcerciseScreen } from './components/ExerciseScreen';
-import { WorkoutScreen } from './components/WorkoutScreen';
-import { WorkoutDetails } from './components/WorkoutDetails';
-import { ProfileScreen } from './components/ProfileScreen';
-import { SplitScreen } from './components/SplitScreen';
-import emitter from "./components/customEventEmitter";
-import { AddWorkout } from './components/AddWorkout';
+import { ExcerciseScreen } from './components/Exercise/ExerciseScreen';
+import { WorkoutScreen } from './components/Workout/WorkoutScreen';
+import { WorkoutDetails } from './components/Workout/WorkoutDetails';
+import { ProfileScreen } from './components/Profile/ProfileScreen';
+import { SplitScreen } from './components/Split/SplitScreen';
+import emitter from "./components/Custom/CustomEventEmitter";
+import { AddWorkout } from './components/Workout/AddWorkout';
 import { getUserData } from './services/UserService';
 import Styles from './Styles';
+import { AddSplit } from './components/Split/AddSplit';
+import { MenuProvider } from 'react-native-popup-menu';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -128,6 +130,12 @@ function SplitStackScreen(userInfo) {
     return (
         <Stack.Navigator>
             <Stack.Screen name='split' component={SplitScreen} initialParams={{ userInfo: userInfo }} options={{ headerShown: false }} />
+            <Stack.Screen name='addSplit' component={AddSplit} options={({ route }) => ({
+                title: 'New workout',
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color
+            })} />
         </Stack.Navigator>
     )
 }
@@ -227,56 +235,58 @@ export default function App() {
         }}>
             <StatusBar
                 backgroundColor="transparent"
-                barStyle="dark-content"
+                barStyle="light-content"
                 translucent={true} // Make sure this is set to false
             >
             </StatusBar>
-            <NavigationContainer>{
-                isLoading ? (
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <ActivityIndicator />
-                        <Text>Logging in...</Text>
-                    </View>
-                ) : ((auth && userInfo) ? (
-                    <Tab.Navigator
-                        style={{ flex: 1 }}
-                        activeColor='#000'
-                        inactiveColor='#CDCD55'
-                        tabBarLabelStyle={{ color: '#CDCD55' }}
-                        barStyle={Styles.lessDark}>
-                        <Tab.Screen name='profileStack'
-                            children={() => <ProfileStackScreen user={userInfo} />}
-                            options={{
-                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Profile</Text>,
-                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='account' color={color} size={26} />)
-                            }}
-                            listeners={{ tabPress: () => { updateProfileEmitter() } }} />
-                        <Tab.Screen name='exerciseStack'
-                            children={() => <ExerciseStackScreen user={userInfo} />}
-                            options={{
-                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Exercises</Text>,
-                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='dumbbell' color={color} size={26} />),
-                                headerShown: false
-                            }}
-                            listeners={{ tabPress: () => { updateExercisesEmitter() } }}
-                        />
-                        <Tab.Screen name='workoutStack'
-                            children={() => <WorkoutStackScreen user={userInfo} />}
-                            options={{
-                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Workouts</Text>,
-                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='weight-lifter' color={color} size={26} />)
-                            }}
-                            listeners={{ tabPress: () => { updateWorkoutEmitter() } }} />
-                        
-                    </Tab.Navigator>
+            <MenuProvider>
+                <NavigationContainer>{
+                    isLoading ? (
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                            <ActivityIndicator />
+                            <Text>Logging in...</Text>
+                        </View>
+                    ) : ((auth && userInfo) ? (
+                        <Tab.Navigator
+                            style={{ flex: 1 }}
+                            activeColor='#000'
+                            inactiveColor='#CDCD55'
+                            tabBarLabelStyle={{ color: '#CDCD55' }}
+                            barStyle={Styles.lessDark}>
+                            <Tab.Screen name='profileStack'
+                                children={() => <ProfileStackScreen user={userInfo} />}
+                                options={{
+                                    tabBarLabel: <Text style={{ color: '#CDCD55' }}>Profile</Text>,
+                                    tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='account' color={color} size={26} />)
+                                }}
+                                listeners={{ tabPress: () => { updateProfileEmitter() } }} />
+                            <Tab.Screen name='exerciseStack'
+                                children={() => <ExerciseStackScreen user={userInfo} />}
+                                options={{
+                                    tabBarLabel: <Text style={{ color: '#CDCD55' }}>Exercises</Text>,
+                                    tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='dumbbell' color={color} size={26} />),
+                                    headerShown: false
+                                }}
+                                listeners={{ tabPress: () => { updateExercisesEmitter() } }}
+                            />
+                            <Tab.Screen name='workoutStack'
+                                children={() => <WorkoutStackScreen user={userInfo} />}
+                                options={{
+                                    tabBarLabel: <Text style={{ color: '#CDCD55' }}>Workouts</Text>,
+                                    tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='weight-lifter' color={color} size={26} />)
+                                }}
+                                listeners={{ tabPress: () => { updateWorkoutEmitter() } }} />
+                            
+                        </Tab.Navigator>
 
-                ) : (
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ padding: 6 }}>Please sign in to store your workouts!</Text>
-                        <Button title='Login' onPress={() => promptAsync({ useProxy: false, showInRecents: true })}
-                        />
-                    </View>
-                ))}</NavigationContainer>
+                    ) : (
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={{ padding: 6 }}>Please sign in to store your workouts!</Text>
+                            <Button title='Login' onPress={() => promptAsync({ useProxy: false, showInRecents: true })}
+                            />
+                        </View>
+                    ))}</NavigationContainer>
+            </MenuProvider>
         </View>
 
     );
