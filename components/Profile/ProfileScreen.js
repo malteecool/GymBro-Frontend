@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, ScrollView, ActivityIndicator, StyleSheet, Text } from "react-native";
 import StatsSlider from "./StatsSlider";
 import ProfileDetailsHeader from './ProfileDetailsHeader';
-import { getWorkoutsCount, getWeekNumber } from '../services/StatsService';
-import emitter from './customEventEmitter';
+import { getWorkoutsCount, getWeekNumber } from '../../services/StatsService';
+import emitter from '../Custom/CustomEventEmitter';
 
 const LoadingSlider = () => {
     return (<View style={styles.cardContainer}>

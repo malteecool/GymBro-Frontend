@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
 import { Card } from "react-native-elements";
-import emitter from "./customEventEmitter";
-import { getDefaultExercises, getExercises, addExercise } from '../services/ExerciseService';
-import { attachToWorkout } from '../services/WorkoutService';
-import Styles from "../Styles";
+import emitter from "../Custom/CustomEventEmitter";
+import { getDefaultExercises, getExercises, addExercise } from '../../services/ExerciseService';
+import { attachToWorkout } from '../../services/WorkoutService';
+import Styles from "../../Styles";
 
 
 export function AddExercise({ navigation, route }) {

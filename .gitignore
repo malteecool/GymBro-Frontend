@@ -16,3 +16,4 @@ my-app-key.keystore
 *.png
 .env
 android/
+.vscode/

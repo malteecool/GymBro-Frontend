@@ -2,9 +2,9 @@ import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } fr
 import React, { useEffect, useState } from 'react';
 import { Card, Button } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import emitter from './customEventEmitter'
-import { removeWorkout as removeWorkoutService, getWorkouts, getFirebaseTimeStamp } from '../services/WorkoutService';
-import Styles from '../Styles';
+import emitter from '../Custom/CustomEventEmitter'
+import { removeWorkout as removeWorkoutService, getWorkouts, getFirebaseTimeStamp } from '../../services/WorkoutService';
+import Styles from '../../Styles';
 
 
 export function WorkoutScreen({ navigation, route }) {
@@ -102,7 +102,7 @@ export function WorkoutScreen({ navigation, route }) {
                                                 </Text>
                                             </View>
                                             <TouchableOpacity onPress={() => warnUser(item)} style={Styles.trashIcon}>
-                                                <MaterialCommunityIcons name="trash-can-outline" size={25} style={Styles.icon} />
+                                                <MaterialCommunityIcons name="trash-can-outline" size={20} style={Styles.icon} />
                                             </TouchableOpacity>
                                         </View>
                                     </Card>
