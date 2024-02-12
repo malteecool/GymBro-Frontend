@@ -20,10 +20,10 @@ export default StyleSheet.create({
         flex: 1, alignItems: 'center', justifyContent: 'center'
     },
     smallCard: {
-        marginHorizontal: 5, 
-        borderWidth: 0, 
-        borderBottomColor: '#CDCD55', 
-        borderBottomWidth: 1, 
+        marginHorizontal: 5,
+        borderWidth: 0,
+        borderBottomColor: '#CDCD55',
+        borderBottomWidth: 1,
         padding: 10,
         paddingLeft: 20,
         backgroundColor: '#1c1a1a',
@@ -37,7 +37,6 @@ export default StyleSheet.create({
         marginBottom: 0,
         borderRadius: 10,
         overflow: 'hidden',
-        //elevation: 5,
         backgroundColor: '#1c1a1a'
     },
     header: {
@@ -45,7 +44,7 @@ export default StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 10,
-        
+
         backgroundColor: '#121111',
     },
     cardTitle: {
@@ -54,6 +53,22 @@ export default StyleSheet.create({
         fontWeight: 'bold',
         marginLeft: 10,
         marginBottom: 5,
+    },
+    setCard: {
+        marginLeft: 5,
+        marginRight: 5,
+        borderWidth: 0,
+        marginBottom: 0,
+        borderRadius: 10,
+        overflow: 'hidden',
+        paddingHorizontal: 0,
+        paddingBottom: 0,
+        borderWidth: 1,
+        backgroundColor: '#0C7C59',
+        borderColor: '#1c1a1a'
+    },
+    setTitle: {
+
     },
     trashIcon: {
         padding: 5,
@@ -74,7 +89,7 @@ export default StyleSheet.create({
         color: '#E5E3D4',
     },
     headerTitle: {
-        fontFamily: 'Oswald-Bold',
+        //fontFamily: 'Oswald-Bold',
         fontSize: 30,
         color: '#E5E3D4',
     },
