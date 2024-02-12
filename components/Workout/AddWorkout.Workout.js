@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { View, TextInput, ScrollView, Text, ActivityIndicator, TouchableOpacity, StyleSheet } from "react-native";
 import { Button, Card } from "react-native-elements";
 import { TabView, TabBar } from 'react-native-tab-view';
-import CustomExerciseView from "../Custom/CustomExerciseView";
-import emitter from "../Custom/CustomEventEmitter";
-import { addWorkout, addWorkoutWithExercises, getDefaultWorkouts } from '../../services/WorkoutService';
+import CustomExerciseView from "../Custom/CustomExerciseView.Custom";
+import emitter from "../Custom/CustomEventEmitter.Custom";
+import { addWorkout, addWorkoutWithExercises, getDefaultWorkouts } from '../../services/WorkoutService.Service';
 import Styles from "../../Styles";
 
 export function AddWorkout({ navigation, route }) {

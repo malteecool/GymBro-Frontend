@@ -1,4 +1,4 @@
-import {  getFirebaseTimeStamp, getHistoryByUser } from './ExerciseService';
+import {  getFirebaseTimeStamp, getHistoryByUser } from './ExerciseService.Service';
 
 
 function startOfWeek(date) {

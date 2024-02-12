@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
 import { Card } from "react-native-elements";
-import emitter from "../Custom/CustomEventEmitter";
-import { getDefaultExercises, getExercises, addExercise } from '../../services/ExerciseService';
-import { attachToWorkout } from '../../services/WorkoutService';
+import emitter from "../Custom/CustomEventEmitter.Custom";
+import { getDefaultExercises, getExercises, addExercise } from '../../services/ExerciseService.Service';
+import { attachToWorkout } from '../../services/WorkoutService.Service';
 import Styles from "../../Styles";
+import { LoadingIndicator } from "../Misc/LoadingIndicator.Misc";
 
 
 export function AddExercise({ navigation, route }) {
@@ -81,6 +82,12 @@ export function AddExercise({ navigation, route }) {
         }
     };
 
+    if (isLoading) {
+        return (
+            <LoadingIndicator text={''} />
+        )
+    }
+
     return (
         <View style={{ flex: 1, alignItems: 'center', backgroundColor: Styles.dark.backgroundColor }}>
 
@@ -94,33 +101,27 @@ export function AddExercise({ navigation, route }) {
             </View>
 
             <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
-                {isLoading ? (
-                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        <ActivityIndicator />
-                    </View>
-                ) : (
-                    <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 120 }}>
-                        {
-                            filteredDataSource.length > 0 ? (
-                                filteredDataSource.map((item, i) => {
-                                    return (
-                                        <TouchableOpacity key={i} onPress={() => onAddExercise(item.exe_name, item.id)}>
-                                            <Card containerStyle={Styles.smallCard}>
-                                                <Text style={{ ...Styles.detailText, margin: 0 }}>{item.exe_name != null ? item.exe_name : item.exe_name}</Text>
-                                            </Card>
-                                        </TouchableOpacity>
-                                    )
-                                })) :
-                                (
-                                    <TouchableOpacity onPress={() => onAddExercise(search)}>
+                <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 120 }}>
+                    {
+                        filteredDataSource.length > 0 ? (
+                            filteredDataSource.map((item, i) => {
+                                return (
+                                    <TouchableOpacity key={i} onPress={() => onAddExercise(item.exe_name, item.id)}>
                                         <Card containerStyle={Styles.smallCard}>
-                                            <Text style={{ ...Styles.detailText, margin: 0 }}>Nothing found, add: {search}</Text>
+                                            <Text style={{ ...Styles.detailText, margin: 0 }}>{item.exe_name != null ? item.exe_name : item.exe_name}</Text>
                                         </Card>
                                     </TouchableOpacity>
                                 )
-                        }
-                    </ScrollView>
-                )}
+                            })) :
+                            (
+                                <TouchableOpacity onPress={() => onAddExercise(search)}>
+                                    <Card containerStyle={Styles.smallCard}>
+                                        <Text style={{ ...Styles.detailText, margin: 0 }}>Nothing found, add: {search}</Text>
+                                    </Card>
+                                </TouchableOpacity>
+                            )
+                    }
+                </ScrollView>
             </View>
         </View>
     );

@@ -5,23 +5,24 @@ import { createNativeStackNavigator, transitionSpec } from '@react-navigation/na
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Button } from 'react-native-elements';
-import { ExerciseDetails } from './components/Exercise/ExerciseDetails';
-import { AddExercise } from './components/Exercise/AddExercise';
-import { AddSet } from './components/Exercise/AddSet';
+import { ExerciseDetails } from './components/Exercise/ExerciseDetails.Exercise';
+import { AddExercise } from './components/Exercise/AddExercise.Exercise';
+import { AddSet } from './components/Exercise/AddSet.Exercise';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
-import { AsyncStorage } from 'react-native';
+//import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
-import { ExcerciseScreen } from './components/Exercise/ExerciseScreen';
-import { WorkoutScreen } from './components/Workout/WorkoutScreen';
-import { WorkoutDetails } from './components/Workout/WorkoutDetails';
-import { ProfileScreen } from './components/Profile/ProfileScreen';
-import { SplitScreen } from './components/Split/SplitScreen';
-import emitter from "./components/Custom/CustomEventEmitter";
-import { AddWorkout } from './components/Workout/AddWorkout';
-import { getUserData } from './services/UserService';
+import { ExcerciseScreen } from './components/Exercise/ExerciseScreen.Exercise';
+import { WorkoutScreen } from './components/Workout/WorkoutScreen.Workout';
+import { WorkoutDetails } from './components/Workout/WorkoutDetails.Workout';
+import { ProfileScreen } from './components/Profile/ProfileScreen.Profile';
+import { SplitScreen } from './components/Split/SplitScreen.Split';
+import emitter from "./components/Custom/CustomEventEmitter.Custom";
+import { AddWorkout } from './components/Workout/AddWorkout.Workout';
+import { getUserData } from './services/UserService.Service';
 import Styles from './Styles';
-import { AddSplit } from './components/Split/AddSplit';
+import { AddSplit } from './components/Split/AddSplit.Split';
 import { MenuProvider } from 'react-native-popup-menu';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -131,7 +132,7 @@ function SplitStackScreen(userInfo) {
         <Stack.Navigator>
             <Stack.Screen name='split' component={SplitScreen} initialParams={{ userInfo: userInfo }} options={{ headerShown: false }} />
             <Stack.Screen name='addSplit' component={AddSplit} options={({ route }) => ({
-                title: 'New workout',
+                title: 'New workout split',
                 headerStyle: Styles.lessDark,
                 headerTitleStyle: Styles.fontColor,
                 headerTintColor: Styles.fontColor.color
@@ -276,7 +277,13 @@ export default function App() {
                                     tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='weight-lifter' color={color} size={26} />)
                                 }}
                                 listeners={{ tabPress: () => { updateWorkoutEmitter() } }} />
-                            
+                            <Tab.Screen name='splitStack'
+                                children={() => <SplitStackScreen user={userInfo} />}
+                                options={{
+                                    tabBarLabel: <Text style={{ color: '#CDCD55' }}>Split</Text>,
+                                    tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='calendar' color={color} size={26} />)
+                                }}
+                            />
                         </Tab.Navigator>
 
                     ) : (
