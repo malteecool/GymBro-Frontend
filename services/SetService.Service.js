@@ -1,6 +1,6 @@
 import { db } from '../firebaseConfig';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { updateExerciseDate, updateExerciseMaxWeight } from './ExerciseService';
+import { updateExerciseDate, updateExerciseMaxWeight } from './ExerciseService.Service';
 
 async function postExercise(exercise, sets) {
 

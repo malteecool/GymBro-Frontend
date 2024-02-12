@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Card, Button, Title } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { addReferenceWeek } from '../../services/SplitService';
+import { addReferenceWeek } from '../../services/SplitService.Service';
+import { getWorkouts } from '../../services/WorkoutService.Service';
 import Styles from "../../Styles";
 import {
     Menu,
-    MenuProvider,
     MenuOptions,
     MenuOption,
     MenuTrigger,
@@ -15,16 +15,18 @@ import {
 export function AddSplit({ navigation, route }) {
 
     const userId = route.params.userId;
-    const [refreshing, setRefreshing] = React.useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [data, setData] = useState([])
+    const [isLoading, setLoading] = useState(true);
 
-    const onRefresh = React.useCallback(() => {
+    const _onRefresh = React.useCallback(() => {
         setRefreshing(true);
         setWorkoutPairs(workoutPairs);
         setRefreshing(false);
     }, []);
 
     const [workoutPairs, setWorkoutPairs] = useState([
-        { day: 'Monday', workout: '' },
+        { day: 'Monday', workout: null },
         { day: 'Tuesday', workout: null },
         { day: 'Wednesday', workout: null },
         { day: 'Thursday', workout: null },
@@ -33,14 +35,28 @@ export function AddSplit({ navigation, route }) {
         { day: 'Sunday', workout: null }
     ]);
 
+    useEffect(() => {
+        const load = async () => {
+            setLoading(true);
+            const workouts = await getWorkouts(userId);
+            const restDayWorkout = {
+                id: '',
+                wor_name: 'Rest day'
+            }
+            setData([restDayWorkout, ...workouts, ]);
+            setLoading(false);
+        }
+        load();
+    }, []);
+
     const onAttachWorkout = (workout, index) => {
         let tempWorkoutPairs = workoutPairs;
         tempWorkoutPairs[index]['workout'] = workout;
         setWorkoutPairs([...tempWorkoutPairs]);
+        console.log(workoutPairs);
     }
 
     const onAddSplit = async () => {
-
         try {
             addReferenceWeek(workoutPairs, userId)
         } catch (error) {
@@ -55,13 +71,20 @@ export function AddSplit({ navigation, route }) {
         }
     }
 
-    return (
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, backgroundColor: Styles.dark.backgroundColor }}>
+                <ActivityIndicator style={Styles.activityIndicator} />
+            </View>
+        )
+    }
 
+    return (
         <View style={{ flex: 1, backgroundColor: Styles.dark.backgroundColor }}>
             <ScrollView
                 contentContainerStyle={{ paddingBottom: 75 }}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
                 }>{
                     workoutPairs.map((workoutPair, i) => {
                         return (
@@ -72,15 +95,18 @@ export function AddSplit({ navigation, route }) {
                                         <Menu style={{ width: 40 }} >
                                             <MenuTrigger><MaterialCommunityIcons style={{ color: Styles.green.backgroundColor }} name='plus-circle' size={40} /></MenuTrigger>
                                             <MenuOptions>
-                                                <MenuOption onSelect={() => onAttachWorkout('Rest day', i)}><Text>Rest day</Text></MenuOption>
-                                                <MenuOption onSelect={() => onAttachWorkout('Chest', i)}><Text>Chest</Text></MenuOption>
-                                                <MenuOption onSelect={() => onAttachWorkout('Legs', i)}><Text>Legs</Text></MenuOption>
-                                                <MenuOption onSelect={() => onAttachWorkout('Back', i)}><Text>Back</Text></MenuOption>
+                                                {
+                                                    data.map((workout, workoutIndex) => {
+                                                        return (
+                                                            <MenuOption onSelect={() => onAttachWorkout(workout, i)}><Text>{workout.wor_name}</Text></MenuOption>
+                                                        )
+                                                    })
+                                                }
                                             </MenuOptions>
 
                                         </Menu>
                                     </View>
-                                    <Text style={{ ...Styles.detailText, marginHorizontal: 10, justifyContent: 'center', textAlign: 'center'}}>{workoutPair['workout']}</Text>
+                                    <Text style={{ ...Styles.detailText, marginHorizontal: 10, justifyContent: 'center', textAlign: 'center' }}>{workoutPair['workout'] ? workoutPair['workout'].wor_name : ''}</Text>
                                 </View>
 
                             </Card>

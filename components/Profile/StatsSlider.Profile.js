@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Dimensions, Text, StyleSheet } from 'react-native';
 import Carousel, { Pagination } from "react-native-snap-carousel";
-import CounterComponent from './AnimateNumber';
-import BarGraph from './BarGraph';
+import CounterComponent from '../Custom/AnimateNumber.Custom';
+import BarGraph from '../Custom/BarGraph.Custom';
 
 const renderDynamicComponent = (sliderComponent, props) => {
     switch (sliderComponent) {
