@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Text, ActivityIndicator } from "react-native";
-import { getWorkoutsCount } from '../../services/StatsService';
+import { getWorkoutsCount } from '../../services/StatsService.Service';
 import Styles from "../../Styles";
 
 export function ProfileDetailsHeader({ user, numberOfTimes}) {

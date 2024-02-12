@@ -1,11 +1,11 @@
 import { db } from "../firebaseConfig";
-import emitter from "../components/Custom/CustomEventEmitter";
+import emitter from "../components/Custom/CustomEventEmitter.Custom";
 import { collection, query, getDocs, where, Timestamp, getDoc, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
 
 
-async function getWorkouts(usrToken) {
+async function getWorkouts(usr_id) {
     const collectionRef = collection(db, 'Workout');
-    const q = query(collectionRef, where("wor_usr_id", "==", usrToken));
+    const q = query(collectionRef, where("wor_usr_id", "==", usr_id));
     const docSnap = await getDocs(q);
     var workoutData = []
     // iterate each workout
@@ -15,9 +15,15 @@ async function getWorkouts(usrToken) {
         tempDoc = { id: doc.id, wor_workout_exercises: exerciseList, ...tempDoc };
         workoutData.push(tempDoc);
     }
-    
+
     workoutData.sort((a, b) => a.wor_last_done <= b.wor_last_done);
     return workoutData;
+}
+
+async function getWorkoutById(wor_id) {
+    const docRef = await getDoc(doc(db, 'Workout', wor_id));    
+    return docRef.data();
+
 }
 
 function getFirebaseTimeStamp(seconds, nanoseconds) {
@@ -60,7 +66,7 @@ async function getWorkoutExercises(workoutId) {
         exercise = { woe_id: exerciseDoc.id, id: exercise.id, ordinal: exerciseData.woe_ordinal, ...exercise.data() };
         documentData.push(exercise);
     }
-    documentData.sort((a,b) => a.ordinal >= b.ordinal);
+    documentData.sort((a, b) => a.ordinal >= b.ordinal);
     return documentData;
 }
 
@@ -90,14 +96,14 @@ const getFormattedTime = (time) => {
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
 }
 
-async function addWorkoutWithExercises(workoutName, selectedExercises, usrToken) {
+async function addWorkoutWithExercises(workoutName, selectedExercises, usr_id) {
     try {
-        const workoutId = await addWorkout(workoutName, usrToken);
+        const workoutId = await addWorkout(workoutName, usr_id);
         for (const exercise of selectedExercises) {
             console.log(exercise);
             console.log(exercise.id);
             console.log(exercise.ordinal);
-            
+
             const docRef = await addDoc(collection(db, 'Workout', workoutId, 'workout_exercise'), {
                 woe_exercise: exercise.id,
                 woe_ordinal: exercise.ordinal
@@ -121,14 +127,14 @@ const attachToWorkout = async (exerciseId, workoutId, ordinal) => {
     }
 }
 
-async function addWorkout(name, usrToken) {
+async function addWorkout(name, usr_id) {
     try {
         const documentData = {
             wor_completed_count: 0,
             wor_estimate_time: 0,
             wor_last_done: Timestamp.fromDate(new Date()),
             wor_name: name,
-            wor_usr_id: usrToken
+            wor_usr_id: usr_id
         };
         const docRef = await addDoc(collection(db, "Workout"), documentData);
         return docRef.id;
@@ -155,5 +161,6 @@ module.exports = {
     getFirebaseTimeStamp: getFirebaseTimeStamp,
     getDefaultWorkouts: getDefaultWorkouts,
     attachToWorkout: attachToWorkout,
-    updateWorkoutExerciseOrdinal: updateWorkoutExerciseOrdinal
+    updateWorkoutExerciseOrdinal: updateWorkoutExerciseOrdinal,
+    getWorkoutById: getWorkoutById
 };

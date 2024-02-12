@@ -3,7 +3,6 @@ import { collection, query, getDocs, where, Timestamp, deleteDoc, doc, updateDoc
 
 
 async function getExercises(usr_id) {
-    console.log("fetching exercises");
     var documentData = [];
     try {
         const collectionRef = collection(db, 'Exercise');

@@ -4,9 +4,9 @@ import { ActivityIndicator, Alert, Animated, Easing, ScrollView, Text, Touchable
 import { Button } from "react-native-elements";
 import { Card } from "react-native-elements";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import emitter from "../Custom/CustomEventEmitter";
-import { removeWorkoutExercise as removeWorkoutExerciseService, getFirebaseTimeStamp } from '../../services/ExerciseService';
-import { getWorkoutExercises, updateWorkout, getFormattedTime, updateWorkoutExerciseOrdinal } from '../../services/WorkoutService';
+import emitter from "../Custom/CustomEventEmitter.Custom";
+import { removeWorkoutExercise as removeWorkoutExerciseService, getFirebaseTimeStamp } from '../../services/ExerciseService.Service';
+import { getWorkoutExercises, updateWorkout, getFormattedTime, updateWorkoutExerciseOrdinal } from '../../services/WorkoutService.Service';
 import Styles from "../../Styles";
 
 export function WorkoutDetails({ navigation, route }) {
@@ -209,13 +209,13 @@ export function WorkoutDetails({ navigation, route }) {
                                                         width: size,
                                                         flexDirection: 'row'
                                                     }}>
-                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { warnUser(workout) }}><MaterialCommunityIcons name='trash-can-outline' size={20} style={Styles.icon} /></TouchableOpacity>
-                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { moveExerciseBackwards(i) }}><MaterialCommunityIcons name='arrow-up' size={20} style={Styles.icon} /></TouchableOpacity>
-                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { moveExerciseForward(i) }}><MaterialCommunityIcons name='arrow-down' size={20} style={Styles.icon} /></TouchableOpacity>
+                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { warnUser(workout) }}><MaterialCommunityIcons name='trash-can-outline' size={24} style={Styles.icon} /></TouchableOpacity>
+                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { moveExerciseBackwards(i) }}><MaterialCommunityIcons name='arrow-up' size={24} style={Styles.icon} /></TouchableOpacity>
+                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { moveExerciseForward(i) }}><MaterialCommunityIcons name='arrow-down' size={24} style={Styles.icon} /></TouchableOpacity>
                                                     </Animated.View>
-                                                    <TouchableOpacity
+                                                    <TouchableOpacity style={{ paddingLeft: 5 }}
                                                         onPress={() => { openEdit() }}>
-                                                        {!edit ? <MaterialCommunityIcons name='pencil' size={20} style={Styles.icon} /> : <MaterialCommunityIcons name='window-close' size={20} style={Styles.icon} />}
+                                                        {!edit ? <MaterialCommunityIcons name='pencil' size={24} style={Styles.icon} /> : <MaterialCommunityIcons name='window-close' size={24} style={Styles.icon} />}
                                                     </TouchableOpacity>
                                                 </View>
                                             </View>
