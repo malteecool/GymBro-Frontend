@@ -137,6 +137,12 @@ function SplitStackScreen(userInfo) {
                 headerTitleStyle: Styles.fontColor,
                 headerTintColor: Styles.fontColor.color
             })} />
+            <Stack.Screen name='workoutDetailsSplit' component={WorkoutDetails} options={({ route }) => ({
+                title: route.params.workout.wor_name,
+                headerStyle: Styles.lessDark,
+                headerTitleStyle: Styles.fontColor,
+                headerTintColor: Styles.fontColor.color
+            })} />
         </Stack.Navigator>
     )
 }

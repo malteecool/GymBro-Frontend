@@ -11,6 +11,7 @@ import {
     MenuOption,
     MenuTrigger,
 } from 'react-native-popup-menu';
+import emitter from "../Custom/CustomEventEmitter.Custom";
 
 export function AddSplit({ navigation, route }) {
 
@@ -25,15 +26,17 @@ export function AddSplit({ navigation, route }) {
         setRefreshing(false);
     }, []);
 
-    const [workoutPairs, setWorkoutPairs] = useState([
-        { day: 'Monday', workout: null },
-        { day: 'Tuesday', workout: null },
-        { day: 'Wednesday', workout: null },
-        { day: 'Thursday', workout: null },
-        { day: 'Friday', workout: null },
-        { day: 'Saturday', workout: null },
-        { day: 'Sunday', workout: null }
-    ]);
+    const [workoutPairs, setWorkoutPairs] = useState(
+        {
+            'Monday': null,
+            'Tuesday': null,
+            'Wednesday': null,
+            'Thursday': null,
+            'Friday': null,
+            'Saturday': null,
+            'Sunday': null
+        }
+    );
 
     useEffect(() => {
         const load = async () => {
@@ -43,30 +46,26 @@ export function AddSplit({ navigation, route }) {
                 id: '',
                 wor_name: 'Rest day'
             }
-            setData([restDayWorkout, ...workouts, ]);
+            setData([restDayWorkout, ...workouts,]);
             setLoading(false);
         }
         load();
     }, []);
 
-    const onAttachWorkout = (workout, index) => {
-        let tempWorkoutPairs = workoutPairs;
-        tempWorkoutPairs[index]['workout'] = workout;
-        setWorkoutPairs([...tempWorkoutPairs]);
+    const onAttachWorkout = (workout, day) => {
+        workoutPairs[day] = workout;
+        setWorkoutPairs({...workoutPairs});
         console.log(workoutPairs);
     }
 
     const onAddSplit = async () => {
         try {
-            addReferenceWeek(workoutPairs, userId)
+            await addReferenceWeek(workoutPairs, userId);
         } catch (error) {
             console.log(error);
         }
         finally {
-            /*emitter.emit('exerciseEvent', 0);
-            if (workoutId) {
-                emitter.emit('workoutExerciseEvent', 0);
-            }*/
+            emitter.emit('splitEvent', 0);
             navigation.goBack();
         }
     }
@@ -86,10 +85,12 @@ export function AddSplit({ navigation, route }) {
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
                 }>{
-                    workoutPairs.map((workoutPair, i) => {
+                    Object.keys(workoutPairs).map((day, i) => {
+                        console.log(day);
+                        console.log(workoutPairs[day])
                         return (
                             <Card key={i} containerStyle={Styles.card}>
-                                <Card.Title style={Styles.cardTitle}><Text>{workoutPair['day']}</Text></Card.Title>
+                                <Card.Title style={Styles.cardTitle}><Text>{day}</Text></Card.Title>
                                 <View style={{ flexDirection: 'row', flex: 1 }}>
                                     <View>
                                         <Menu style={{ width: 40 }} >
@@ -98,7 +99,7 @@ export function AddSplit({ navigation, route }) {
                                                 {
                                                     data.map((workout, workoutIndex) => {
                                                         return (
-                                                            <MenuOption onSelect={() => onAttachWorkout(workout, i)}><Text>{workout.wor_name}</Text></MenuOption>
+                                                            <MenuOption onSelect={() => onAttachWorkout(workout, day)}><Text>{workout.wor_name}</Text></MenuOption>
                                                         )
                                                     })
                                                 }
@@ -106,7 +107,7 @@ export function AddSplit({ navigation, route }) {
 
                                         </Menu>
                                     </View>
-                                    <Text style={{ ...Styles.detailText, marginHorizontal: 10, justifyContent: 'center', textAlign: 'center' }}>{workoutPair['workout'] ? workoutPair['workout'].wor_name : ''}</Text>
+                                    <Text style={{ ...Styles.detailText, marginHorizontal: 10, justifyContent: 'center', textAlign: 'center' }}>{workoutPairs[day] ? workoutPairs[day].wor_name : ''}</Text>
                                 </View>
 
                             </Card>
@@ -114,7 +115,6 @@ export function AddSplit({ navigation, route }) {
                     })
                 }
             </ScrollView>
-
             <View style={{ position: 'absolute', width: '100%', bottom: 0 }}>
                 <Button title='Add split' buttonStyle={{ margin: 10, ...Styles.green }} onPress={() => { onAddSplit() }} />
             </View>
