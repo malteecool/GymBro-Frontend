@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from 'react-native-elements';
 import { Card2 } from '../Custom/CustomCard.Custom';
 import emitter from '../Custom/CustomEventEmitter.Custom';
-import { postExercise } from '../../services/SetService.Service';
+import { addExerciseHistory } from '../../services/SetService.Service';
 import Styles from '../../Styles';
 import { LoadingIndicator } from '../Misc/LoadingIndicator.Misc';
 
@@ -20,7 +20,7 @@ export function AddSet({ navigation, route }) {
     const onAddHistory = async () => {
         try {
             setLoading(true);
-            await postExercise(exercise, data)
+            await addExerciseHistory(exercise, data)
         }
 
         catch (error) {

@@ -2,7 +2,7 @@ import { db } from '../firebaseConfig';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { updateExerciseDate, updateExerciseMaxWeight } from './ExerciseService.Service';
 
-async function postExercise(exercise, sets) {
+async function addExerciseHistory(exercise, sets) {
 
     try {
         const documentData = {
@@ -30,5 +30,5 @@ async function postExercise(exercise, sets) {
 }
 
 module.exports = {
-    postExercise: postExercise
+    addExerciseHistory: addExerciseHistory
 }
