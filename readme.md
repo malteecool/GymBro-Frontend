@@ -7,6 +7,9 @@ https://nodejs.org/en
 After cloning the repository, cd to the newly created folder.
 Inside the folder run ´npm install´ to download the needed node modules.
 
+## Get the current firebaseConfig.
+In order to connect to the FB database a firebaseConfig file is needed.
+
 ## Run the development build
 The application is developed with Expo and uses native code. To run the development build use the command below: 
 
