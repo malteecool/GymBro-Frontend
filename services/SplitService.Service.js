@@ -19,9 +19,9 @@ async function getReferenceWeek(usr_id) {
     const docs = await getSplitId(usr_id);
     if (docs[0].id) {
 
-        splitId = docSnap.docs[0].id;
+        splitId = docs[0].id;
 
-        const subCollectionRef = collection(db, 'Split', docSnap.docs[0].id, 'Split_week');
+        const subCollectionRef = collection(db, 'Split', docs[0].id, 'Split_week');
         const referenceDoc = await getDocs(subCollectionRef);
 
         let dataMap = [];
@@ -84,7 +84,7 @@ async function getReferenceWeek(usr_id) {
         dataMap.push({ weekMapOrdered: null, ordinal: -1 })
         dataMap.sort((a, b) => a.ordinal >= b.ordinal);
         const sorteredDataMap = dataMap.map((data) => data.weekMapOrdered);
-        return { weeks: sorteredDataMap, spl_ref_week: docSnap.docs[0].data().spl_ref_week };
+        return { weeks: sorteredDataMap, spl_ref_week: docs[0].data().spl_ref_week };
     }
     return null;
 }
