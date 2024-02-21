@@ -26,8 +26,8 @@ async function getDefaultExercises() {
     const q = query(collectionRef);
     const docSnap = await getDocs(q);
     const docDataArray = [];
-    await docSnap.forEach(async (doc) => {
-        const docData = await doc.data();
+    docSnap.forEach(async (doc) => {
+        const docData = doc.data();
         docDataArray.push(docData);
     });
     return docDataArray;

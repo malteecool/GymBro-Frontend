@@ -147,5 +147,13 @@ export default StyleSheet.create({
     oswaldBold: {
         fontFamily: 'Oswald-Bold',
         fontSize: 35,
-    }
+    },
+    menuContainer: {
+        flexDirection: 'column',
+        padding: 30,
+      },
+      menuBackdrop: {
+        backgroundColor: '#1c1a1a',
+        opacity: 0.5,
+      },
 });

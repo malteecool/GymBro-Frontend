@@ -1,52 +1,70 @@
 import { db } from "../firebaseConfig";
-import { collection, query, getDocs, where, addDoc, updateDoc, getDoc } from "firebase/firestore";
+import { collection, query, getDocs, where, addDoc, updateDoc, getDoc, doc } from "firebase/firestore";
 import { getWeekNumber } from './StatsService.Service';
 import { getWorkoutById } from './WorkoutService.Service';
 
+let splitId = null;
 
+async function getSplitId(usr_id) {
+    const collectionRef = collection(db, 'Split');
+    const q = query(collectionRef, where("spl_usr_id", "==", usr_id));
+    const docSnap = await getDocs(q);
+    return docSnap.docs;
+}
 
 async function getReferenceWeek(usr_id) {
 
     const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    const collectionRef = collection(db, 'Split');
-    const q = query(collectionRef, where("spl_usr_id", "==", usr_id));
-    const docSnap = await getDocs(q);
-    if (docSnap.docs[0].id) {
+    const docs = await getSplitId(usr_id);
+    if (docs[0].id) {
+
+        splitId = docSnap.docs[0].id;
+
         const subCollectionRef = collection(db, 'Split', docSnap.docs[0].id, 'Split_week');
         const referenceDoc = await getDocs(subCollectionRef);
 
-        const currentWeek = getWeekNumber(new Date());
-        const referenceWeek = docSnap.docs[0].data().spl_ref_week;
-        console.log(referenceWeek);
-
         let dataMap = [];
-        // weeks 
-        for (let i = currentWeek - referenceWeek; i < 5; i++) {
-            console.log(referenceDoc.docs.length)
+
+        for (let i = 0; i < 5; i++) {
             let doc = referenceDoc.docs[i];
 
             let weekMap = {}
             const ordinal = doc.data();
-
-            for (const day of weekDays) {
-                console.log(day);
-                const dayRef = await getDocs(collection(subCollectionRef, doc.id, day));
-                const dayData = dayRef.docs[0].data();
-
-                let workout = null;
-
-                if (dayData.swk_wor_id) {
-                    //promises.push(getWorkoutById(referenceData[day]))
-                    workout = await getWorkoutById(dayData.swk_wor_id);
-                    //weekMap = { ...weekMap, [day]: { workout: workout, completed: false } }
-                } else if (dayData.swk_wor_id != null && dayData.swk_wor_id === '') {
-                    console.log("empty id, adding restday")
-                    workout = { wor_name: 'Rest day', id: '' };
-                }
-
-                weekMap[day] = {workout: workout, completed: dayData.swk_completed }
+            const promises = [];
+            const workoutMap = [];
+            for (let day of weekDays) {
+                promises.push(getDocs(collection(subCollectionRef, doc.id, day)));
             }
+
+            await Promise.all(promises).then(responses => {
+                responses.forEach((response, index) => {
+                    if (response) {
+                        const data = response.docs[0].data();
+                        workoutMap.push({ dayIndex: index, workoutId: data.swk_wor_id, completed: data.swk_completed ? data.swk_completed : false });
+                    }
+                });
+            });
+
+            const workoutPromise = [];
+            for (let workout of workoutMap) {
+                if (workout && workout.workoutId) {
+                    workoutPromise.push(getWorkoutById(workout.workoutId))
+                } else {
+                    workoutPromise.push(null);
+                }
+            }
+
+            await Promise.all(workoutPromise).then(workouts => {
+                workouts.forEach((workout, index) => {
+                    if (!workout) {
+                        console.log("empty id, adding restday")
+                        workout = { wor_name: 'Rest day', id: '' };
+                    }
+
+                    weekMap[weekDays[index]] = { workout: workout, completed: workoutMap[index].completed, day: weekDays[index], weekId: doc.id }
+                });
+            });
 
             const weekMapOrdered = {
                 'Monday': weekMap['Monday'],
@@ -58,64 +76,26 @@ async function getReferenceWeek(usr_id) {
                 'Sunday': weekMap['Sunday']
             };
 
-            dataMap.push(weekMapOrdered);
+            dataMap.push({ weekMapOrdered, ...ordinal });
 
-            console.log(ordinal);
-            /*const promises = [
-                getWorkoutById(referenceData['Monday']),
-                getWorkoutById(referenceData['Tuesday']),
-                getWorkoutById(referenceData['Wednesday']),
-                getWorkoutById(referenceData['Thursday']),
-                getWorkoutById(referenceData['Friday']),
-                getWorkoutById(referenceData['Saturday']),
-                getWorkoutById(referenceData['Sunday']),
-            ]*/
-
-            /*for (let day in referenceData) {
-                console.log(day);
-                let workout = null;
-                //if (day && day.endsWith('_completed')) {
-                //    weekMap[day] = {...weekMap[day], completed: referenceData[day]}
-                //    continue;
-                //}
-                if (referenceData[day]) {
-                    //promises.push(getWorkoutById(referenceData[day]))
-                    workout = await getWorkoutById(referenceData[day]);
-                    //weekMap = { ...weekMap, [day]: { workout: workout, completed: false } }
-                } else if (referenceData[day] != null && referenceData[day] === '') {
-                    console.log("empty id, adding restday")
-                    workout = { wor_name: 'Rest day', id: '' };
-                }
-
-                
-
-            }*/
-
-            /*await Promise.all(promises).then(responses => {
-                responses.forEach(response => {
-                    if (response) {
-                        console.log(response)
-                        //weekMap = { ...weekMap, [day]: {workout: workout, completed: false} }
-                    }
-                });
-            })*/
-
-
-
-            
-
-            
         }
-        return { weeks: dataMap, spl_ref_week: docSnap.docs[0].data().spl_ref_week };
+
+        // This is just needed to add the first view in the carousel, does not contain any data.
+        dataMap.push({ weekMapOrdered: null, ordinal: -1 })
+        dataMap.sort((a, b) => a.ordinal >= b.ordinal);
+        const sorteredDataMap = dataMap.map((data) => data.weekMapOrdered);
+        return { weeks: sorteredDataMap, spl_ref_week: docSnap.docs[0].data().spl_ref_week };
     }
     return null;
 }
 
 
-async function markDayAsCompleted(splitId, weekId, day, completed) {
-    updateDoc(doc(db, 'Split', splitId, 'Split_week', weekId,), {
-
-    })
+async function markDayAsCompleted(weekId, day, completed) {
+    const documentRef = await getDocs(collection(db, 'Split', splitId, 'Split_week', weekId, day))
+    const documentId = documentRef.docs[0].id;
+    updateDoc(doc(db, 'Split', splitId, 'Split_week', weekId, day, documentId), {
+        swk_completed: completed
+    });
 }
 
 async function addReferenceWeek(referenceWeek, usr_id) {
@@ -125,56 +105,75 @@ async function addReferenceWeek(referenceWeek, usr_id) {
         spl_usr_id: usr_id,
         spl_ref_week: currentWeek
     };
-    const docRef = await addDoc(collection(db, 'Split'), splitDocumentData);
 
-    const generatedWeeks = convertToWeekData(referenceWeek, currentWeek);
-    console.log(generatedWeeks);
+    try {
+        const docRef = await addDoc(collection(db, 'Split'), splitDocumentData);
 
-    Object.keys(generatedWeeks).forEach(async (week, i) => {
+        const generatedWeeks = convertToWeekData(referenceWeek, currentWeek);
+        console.log(generatedWeeks);
 
-        // move this shit to promises
+        Object.keys(generatedWeeks).forEach(async (week, i) => {
 
-        const collectionRef = collection(db, 'Split', docRef.id, 'Split_week')
-        const refDocRef = await addDoc(collectionRef, {
-            ordinal: i
+            // move this shit to promises
+
+            const collectionRef = collection(db, 'Split', docRef.id, 'Split_week')
+            const refDocRef = await addDoc(collectionRef, {
+                ordinal: i
+            });
+            await addDoc(collection(collectionRef, refDocRef.id, 'Monday'), {
+                swk_wor_id: generatedWeeks[week]['Monday'] ? generatedWeeks[week]['Monday'].id : null,
+                swk_completed: false
+            });
+            await addDoc(collection(collectionRef, refDocRef.id, 'Tuesday'), {
+                swk_wor_id: generatedWeeks[week]['Tuesday'] ? generatedWeeks[week]['Tuesday'].id : null,
+                swk_completed: false
+            })
+            await addDoc(collection(collectionRef, refDocRef.id, 'Wednesday'), {
+                swk_wor_id: generatedWeeks[week]['Wednesday'] ? generatedWeeks[week]['Wednesday'].id : null,
+                swk_completed: false
+            })
+            await addDoc(collection(collectionRef, refDocRef.id, 'Thursday'), {
+                swk_wor_id: generatedWeeks[week]['Thursday'] ? generatedWeeks[week]['Thursday'].id : null,
+                swk_completed: false
+            })
+            await addDoc(collection(collectionRef, refDocRef.id, 'Friday'), {
+                swk_wor_id: generatedWeeks[week]['Friday'] ? generatedWeeks[week]['Friday'].id : null,
+                swk_completed: false
+            })
+            await addDoc(collection(collectionRef, refDocRef.id, 'Saturday'), {
+                swk_wor_id: generatedWeeks[week]['Saturday'] ? generatedWeeks[week]['Saturday'].id : null,
+                swk_completed: false
+            })
+            await addDoc(collection(collectionRef, refDocRef.id, 'Sunday'), {
+                swk_wor_id: generatedWeeks[week]['Sunday'] ? generatedWeeks[week]['Sunday'].id : null,
+                swk_completed: false
+            })
+
+
         });
-        await addDoc(collection(collectionRef, refDocRef.id, 'Monday'), {
-            swk_wor_id: generatedWeeks[week]['Monday'] ? generatedWeeks[week]['Monday'].id : null,
-            swk_completed: false
-        });
-        await addDoc(collection(collectionRef, refDocRef.id, 'Tuesday'), {
-            swk_wor_id: generatedWeeks[week]['Tuesday'] ? generatedWeeks[week]['Tuesday'].id : null,
-            swk_completed: false
-        })
-        await addDoc(collection(collectionRef, refDocRef.id, 'Wednesday'), {
-            swk_wor_id: generatedWeeks[week]['Wednesday'] ? generatedWeeks[week]['Wednesday'].id : null,
-            swk_completed: false
-        })
-        await addDoc(collection(collectionRef, refDocRef.id, 'Thursday'), {
-            swk_wor_id: generatedWeeks[week]['Thursday'] ? generatedWeeks[week]['Thursday'].id : null,
-            swk_completed: false 
-        })
-        await addDoc(collection(collectionRef, refDocRef.id, 'Friday'), {
-            swk_wor_id: generatedWeeks[week]['Friday'] ? generatedWeeks[week]['Friday'].id : null,
-            swk_completed: false
-        })
-        await addDoc(collection(collectionRef, refDocRef.id, 'Saturday'), {
-            swk_wor_id: generatedWeeks[week]['Saturday'] ? generatedWeeks[week]['Saturday'].id : null,
-            swk_completed: false
-        })
-        await addDoc(collection(collectionRef, refDocRef.id, 'Sunday'), {
-            swk_wor_id: generatedWeeks[week]['Sunday'] ? generatedWeeks[week]['Sunday'].id : null,
-            swk_completed: false
-        })
+
+    } catch (error) {
+        console.log(error);
+    } finally {
+        removeOldSplitIfExists(usr_id);
+    }
+
+}
 
 
-    });
+async function removeOldSplitIfExists(usr_id) {
+
+    const docs = await getSplitId(usr_id);
+
+    if (docs && docs.length > 1 ) {
+
+        //todo
+
+    }
 
 }
 
 function convertToWeekData(splitData, refWeek) {
-
-    console.log(splitData);
 
     const numberOfFutureWeeks = 5; // The number of week forward the split is calculated.
     const referenceWeekNumber = refWeek ? refWeek : getWeekNumber(new Date());
@@ -224,5 +223,6 @@ function convertToWeekData(splitData, refWeek) {
 module.exports = {
     getReferenceWeek: getReferenceWeek,
     addReferenceWeek: addReferenceWeek,
-    convertToWeekData: convertToWeekData
+    convertToWeekData: convertToWeekData,
+    markDayAsCompleted: markDayAsCompleted
 };

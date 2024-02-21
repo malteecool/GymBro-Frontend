@@ -3,6 +3,7 @@ import { getExercises } from "../../services/ExerciseService.Service";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
 import { Card } from "react-native-elements";
 import Styles from "../../Styles";
+import { LoadingIndicator } from "../Misc/LoadingIndicator.Misc";
 
 export function CustomExerciseView({ userid, childToParent }) {
     const [data, setData] = useState([]);
@@ -39,6 +40,12 @@ export function CustomExerciseView({ userid, childToParent }) {
         active: { backgroundColor: '#0C7C59' },
         inactive: { backgroundColor: '#1c1a1a' }
     });
+
+    if (isLoading) {
+        return (
+            <LoadingIndicator text={''}/>
+        )
+    }
 
     return (
         <View style={{ flex: 1 }}>

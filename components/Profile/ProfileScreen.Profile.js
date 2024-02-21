@@ -119,15 +119,11 @@ export function ProfileScreen({ navigation, route }) {
             <ScrollView style={{
                 flex: 1,
             }}>
-                {/* Top half */}
                 <ProfileDetailsHeader user={user} numberOfTimes={weeklyData}/>
-
-                {/* Bottom half */}
 
                 {weeklyCountLoading ? (<LoadingSlider />) : (<StatsSlider stats={weeklyData} sliderComponent={'CounterComponent'} />)}
 
                 {trendCountLoading ? (<LoadingSlider /> ) : (<StatsSlider stats={trendData} sliderComponent={'BarGraph'} />)}
-
 
             </ScrollView>
         </View>

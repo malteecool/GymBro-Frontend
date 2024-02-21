@@ -24,6 +24,7 @@ import { getUserData } from './services/UserService.Service';
 import Styles from './Styles';
 import { AddSplit } from './components/Split/AddSplit.Split';
 import { MenuProvider } from 'react-native-popup-menu';
+import { LoadingIndicator } from './components/Misc/LoadingIndicator.Misc';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -234,6 +235,27 @@ export default function App() {
         }
     };
 
+    const menuProviderStyles = {
+        backdrop: Styles.menuBackdrop
+    }
+
+    if (isLoading) {
+        return (
+            <LoadingIndicator text={'Logging in...'} />
+        )
+
+    }
+
+    if (!auth || !userInfo) {
+        return (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ padding: 6 }}>Please sign in to store your workouts!</Text>
+                <Button title='Login' onPress={() => promptAsync({ useProxy: false, showInRecents: true })}
+                />
+            </View>
+        )
+    }
+
     return (
         <View style={{
             flex: 1,
@@ -243,62 +265,49 @@ export default function App() {
             <StatusBar
                 backgroundColor="transparent"
                 barStyle="light-content"
-                translucent={true} // Make sure this is set to false
+                translucent={true}
             >
             </StatusBar>
-            <MenuProvider>
-                <NavigationContainer>{
-                    isLoading ? (
-                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                            <ActivityIndicator />
-                            <Text>Logging in...</Text>
-                        </View>
-                    ) : ((auth && userInfo) ? (
-                        <Tab.Navigator
-                            style={{ flex: 1 }}
-                            activeColor='#000'
-                            inactiveColor='#CDCD55'
-                            tabBarLabelStyle={{ color: '#CDCD55' }}
-                            barStyle={Styles.lessDark}>
-                            <Tab.Screen name='profileStack'
-                                children={() => <ProfileStackScreen user={userInfo} />}
-                                options={{
-                                    tabBarLabel: <Text style={{ color: '#CDCD55' }}>Profile</Text>,
-                                    tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='account' color={color} size={26} />)
-                                }}
-                                listeners={{ tabPress: () => { updateProfileEmitter() } }} />
-                            <Tab.Screen name='exerciseStack'
-                                children={() => <ExerciseStackScreen user={userInfo} />}
-                                options={{
-                                    tabBarLabel: <Text style={{ color: '#CDCD55' }}>Exercises</Text>,
-                                    tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='dumbbell' color={color} size={26} />),
-                                    headerShown: false
-                                }}
-                                listeners={{ tabPress: () => { updateExercisesEmitter() } }}
-                            />
-                            <Tab.Screen name='workoutStack'
-                                children={() => <WorkoutStackScreen user={userInfo} />}
-                                options={{
-                                    tabBarLabel: <Text style={{ color: '#CDCD55' }}>Workouts</Text>,
-                                    tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='weight-lifter' color={color} size={26} />)
-                                }}
-                                listeners={{ tabPress: () => { updateWorkoutEmitter() } }} />
-                            <Tab.Screen name='splitStack'
-                                children={() => <SplitStackScreen user={userInfo} />}
-                                options={{
-                                    tabBarLabel: <Text style={{ color: '#CDCD55' }}>Split</Text>,
-                                    tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='calendar' color={color} size={26} />)
-                                }}
-                            />
-                        </Tab.Navigator>
-
-                    ) : (
-                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                            <Text style={{ padding: 6 }}>Please sign in to store your workouts!</Text>
-                            <Button title='Login' onPress={() => promptAsync({ useProxy: false, showInRecents: true })}
-                            />
-                        </View>
-                    ))}</NavigationContainer>
+            <MenuProvider customStyles={menuProviderStyles}>
+                <NavigationContainer>
+                    <Tab.Navigator
+                        style={{ flex: 1 }}
+                        activeColor='#000'
+                        inactiveColor='#CDCD55'
+                        tabBarLabelStyle={{ color: '#CDCD55' }}
+                        barStyle={Styles.lessDark}>
+                        <Tab.Screen name='profileStack'
+                            children={() => <ProfileStackScreen user={userInfo} />}
+                            options={{
+                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Profile</Text>,
+                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='account' color={color} size={26} />)
+                            }}
+                            listeners={{ tabPress: () => { updateProfileEmitter() } }} />
+                        <Tab.Screen name='exerciseStack'
+                            children={() => <ExerciseStackScreen user={userInfo} />}
+                            options={{
+                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Exercises</Text>,
+                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='dumbbell' color={color} size={26} />),
+                                headerShown: false
+                            }}
+                            listeners={{ tabPress: () => { updateExercisesEmitter() } }}
+                        />
+                        <Tab.Screen name='workoutStack'
+                            children={() => <WorkoutStackScreen user={userInfo} />}
+                            options={{
+                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Workouts</Text>,
+                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='weight-lifter' color={color} size={26} />)
+                            }}
+                            listeners={{ tabPress: () => { updateWorkoutEmitter() } }} />
+                        <Tab.Screen name='splitStack'
+                            children={() => <SplitStackScreen user={userInfo} />}
+                            options={{
+                                tabBarLabel: <Text style={{ color: '#CDCD55' }}>Split</Text>,
+                                tabBarIcon: ({ color }) => (<MaterialCommunityIcons name='calendar' color={color} size={26} />)
+                            }}
+                        />
+                    </Tab.Navigator>
+                </NavigationContainer>
             </MenuProvider>
         </View>
 

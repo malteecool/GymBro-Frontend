@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Text, TouchableOpacity, Dimensions, ScrollView, RefreshControl } from "react-native";
 import { Button, Card } from 'react-native-elements';
 import Carousel from "react-native-snap-carousel";
-import { getReferenceWeek, convertToWeekData } from '../../services/SplitService.Service';
+import { getReferenceWeek, markDayAsCompleted } from '../../services/SplitService.Service';
 import { getWeekNumber } from '../../services/StatsService.Service';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Styles from "../../Styles";
@@ -33,7 +33,6 @@ export function SplitScreen({ navigation, route }) {
     const load = async () => {
         setLoading(true);
         const data = await getReferenceWeek(user.id);
-        setData(data);
         setWeekData(data.weeks);
         setLoading(false);
     }
@@ -67,21 +66,25 @@ export function SplitScreen({ navigation, route }) {
     }, []);
 
     const markAsCompleted = (week, day) => {
-        setLoading(true);
         weekData[week][day].completed = !weekData[week][day].completed;
         const updatedWeekData = weekData.map(item => ({ ...item }));
         setWeekData(updatedWeekData);
-        setLoading(false);
+        markDayAsCompleted(weekData[week][day].weekId, weekData[week][day].day, weekData[week][day].completed);
     }
 
     const _renderItem = ({ item, index }) => {
         if (index == 0) {
             return (
                 <View key={index} style={{ flex: 1 }}>
-                    <Text style={{fontSize: 20, justifyContent: 'center', textAlign:'center', color: Styles.fontColor.color}}>This is your reference week. All the following weeks are based on this.</Text>
+                    <View style={{flex: 1, justifyContent: 'center'}}>
+                        <Text style={{ fontSize: 20, justifyContent: 'center', textAlign: 'center', color: Styles.fontColor.color }}>
+                            When creating a new split, all the following weeks will be based on your reference week. Add the split that you want and the following weeks will be automatically generated.
+                        </Text>
+                    </View>
+
                     <View style={{ flex: 1, backgroundColor: Styles.dark.backgroundColor, justifyContent: 'center', alignContent: 'center' }}>
                         <Button onPress={() => { navigation.navigate('addSplit', { userId: user.id }) }}
-                            buttonStyle={{ ...Styles.green, alignSelf: 'center' }} title={'Create your split'} />
+                            buttonStyle={{ ...Styles.green, alignSelf: 'center' }} title={'Create a new split'} />
                     </View>
                 </View>
             );
@@ -90,40 +93,36 @@ export function SplitScreen({ navigation, route }) {
         return (
             <View key={item.id} style={{ flex: 1 }}>
                 {
-                    <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 15 }}
-                        refreshControl={
-                            <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
-                        }
-                    >{
-                            Object.keys(item).map((day, i) => (
-                                    <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetailsSplit', { workout: item[day].workout }) }}>
-                                        <Card containerStyle={[Styles.card, item[day].completed ? Styles.green : null]}>
-                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <View>
-                                                    <Text style={Styles.cardTitle}>
-                                                        <MaterialCommunityIcons style={Styles.icon} name='calendar' size={22} />
-                                                        {' ' + day}
-                                                    </Text>
-                                                    <Text style={{ ...Styles.fontColor, fontSize: 18, marginLeft: 10 }}>
-                                                        <MaterialCommunityIcons style={Styles.icon} name='weight-lifter' size={22} />
-                                                        {' ' + item[day].workout.wor_name}
-                                                    </Text>
-                                                </View>
-                                                <View style={{ justifyContent: 'center', alignContent: 'center', marginRight: 10 }}>
-                                                    <TouchableOpacity style={{ padding: 10 }} onPress={() => markAsCompleted(index, day)}>
-                                                        {
-                                                            !item[day].completed ? 
-                                                            (<MaterialCommunityIcons style={Styles.icon} name="check" size={35} />) : 
-                                                            (<MaterialCommunityIcons style={Styles.icon} name="window-close" size={35} />)
-                                                        }
-                                                    </TouchableOpacity>
-                                                </View>
-                                            </View>
-                                        </Card>
-                                    </TouchableOpacity>
-                                )
-                            )
-                        }</ScrollView>
+                    <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 15 }}>{
+                        Object.keys(item).map((day, i) => (
+                            <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetailsSplit', { workout: item[day].workout }) }}>
+                                <Card containerStyle={[Styles.card, item[day].completed ? Styles.green : null]}>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <View>
+                                            <Text style={Styles.cardTitle}>
+                                                <MaterialCommunityIcons style={Styles.icon} name='calendar' size={22} />
+                                                {' ' + day}
+                                            </Text>
+                                            <Text style={{ ...Styles.fontColor, fontSize: 18, marginLeft: 10 }}>
+                                                <MaterialCommunityIcons style={Styles.icon} name='weight-lifter' size={22} />
+                                                {' ' + item[day].workout.wor_name}
+                                            </Text>
+                                        </View>
+                                        <View style={{ justifyContent: 'center', alignContent: 'center', marginRight: 10 }}>
+                                            <TouchableOpacity style={{ padding: 10 }} onPress={() => markAsCompleted(index, day)}>
+                                                {
+                                                    !item[day].completed ?
+                                                        (<MaterialCommunityIcons style={Styles.icon} name="check" size={35} />) :
+                                                        (<MaterialCommunityIcons style={Styles.icon} name="window-close" size={35} />)
+                                                }
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </Card>
+                            </TouchableOpacity>
+                        )
+                        )
+                    }</ScrollView>
                 }
             </View>
         );

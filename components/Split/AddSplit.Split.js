@@ -54,8 +54,7 @@ export function AddSplit({ navigation, route }) {
 
     const onAttachWorkout = (workout, day) => {
         workoutPairs[day] = workout;
-        setWorkoutPairs({...workoutPairs});
-        console.log(workoutPairs);
+        setWorkoutPairs({ ...workoutPairs });
     }
 
     const onAddSplit = async () => {
@@ -90,24 +89,28 @@ export function AddSplit({ navigation, route }) {
                         console.log(workoutPairs[day])
                         return (
                             <Card key={i} containerStyle={Styles.card}>
-                                <Card.Title style={Styles.cardTitle}><Text>{day}</Text></Card.Title>
                                 <View style={{ flexDirection: 'row', flex: 1 }}>
                                     <View>
-                                        <Menu style={{ width: 40 }} >
-                                            <MenuTrigger><MaterialCommunityIcons style={{ color: Styles.green.backgroundColor }} name='plus-circle' size={40} /></MenuTrigger>
-                                            <MenuOptions>
-                                                {
-                                                    data.map((workout, workoutIndex) => {
-                                                        return (
-                                                            <MenuOption onSelect={() => onAttachWorkout(workout, day)}><Text>{workout.wor_name}</Text></MenuOption>
-                                                        )
-                                                    })
-                                                }
-                                            </MenuOptions>
-
-                                        </Menu>
+                                        <Text style={{ ...Styles.cardTitle, marginLeft: 0 }}>
+                                            <MaterialCommunityIcons style={Styles.icon} name='calendar' size={22} />
+                                            {' ' + day}
+                                        </Text>
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <Menu  >
+                                                <MenuTrigger><MaterialCommunityIcons style={{ color: Styles.green.backgroundColor }} name='plus-circle' size={22} /></MenuTrigger>
+                                                <MenuOptions customStyles={optionsStyles}>
+                                                    {
+                                                        data.map((workout, workoutIndex) => {
+                                                            return (
+                                                                <MenuOption onSelect={() => onAttachWorkout(workout, day)}><Text style={{ fontSize: 16 }}>{workout.wor_name}</Text></MenuOption>
+                                                            )
+                                                        })
+                                                    }
+                                                </MenuOptions>
+                                            </Menu>
+                                            <Text style={{ ...Styles.fontColor, fontSize: 18 }}>{' ' + (workoutPairs[day] ? workoutPairs[day].wor_name : '')}</Text>
+                                        </View>
                                     </View>
-                                    <Text style={{ ...Styles.detailText, marginHorizontal: 10, justifyContent: 'center', textAlign: 'center' }}>{workoutPairs[day] ? workoutPairs[day].wor_name : ''}</Text>
                                 </View>
 
                             </Card>
