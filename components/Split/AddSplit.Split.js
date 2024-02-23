@@ -12,6 +12,7 @@ import {
     MenuTrigger,
 } from 'react-native-popup-menu';
 import emitter from "../Custom/CustomEventEmitter.Custom";
+import { LoadingIndicator } from "../Misc/LoadingIndicator.Misc";
 
 export function AddSplit({ navigation, route }) {
 
@@ -19,6 +20,7 @@ export function AddSplit({ navigation, route }) {
     const [refreshing, setRefreshing] = useState(false);
     const [data, setData] = useState([])
     const [isLoading, setLoading] = useState(true);
+    const [isAddLoading, setAddLoading] = useState(true);
 
     const _onRefresh = React.useCallback(() => {
         setRefreshing(true);
@@ -59,6 +61,7 @@ export function AddSplit({ navigation, route }) {
 
     const onAddSplit = async () => {
         try {
+            setAddLoading(true);
             await addReferenceWeek(workoutPairs, userId);
         } catch (error) {
             console.log(error);
@@ -69,14 +72,17 @@ export function AddSplit({ navigation, route }) {
         }
     }
 
+    /*if (isAddLoading) {
+        return (
+            <LoadingIndicator text={ 'Adding split...'} />
+        )
+    }*/
+
     if (isLoading) {
         return (
-            <View style={{ flex: 1, backgroundColor: Styles.dark.backgroundColor }}>
-                <ActivityIndicator style={Styles.activityIndicator} />
-            </View>
+            <LoadingIndicator text={ 'loading existing workouts...'} />
         )
     }
-
     return (
         <View style={{ flex: 1, backgroundColor: Styles.dark.backgroundColor }}>
             <ScrollView
@@ -85,8 +91,6 @@ export function AddSplit({ navigation, route }) {
                     <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
                 }>{
                     Object.keys(workoutPairs).map((day, i) => {
-                        console.log(day);
-                        console.log(workoutPairs[day])
                         return (
                             <Card key={i} containerStyle={Styles.card}>
                                 <View style={{ flexDirection: 'row', flex: 1 }}>
@@ -96,13 +100,13 @@ export function AddSplit({ navigation, route }) {
                                             {' ' + day}
                                         </Text>
                                         <View style={{ flexDirection: 'row' }}>
-                                            <Menu  >
+                                            <Menu>
                                                 <MenuTrigger><MaterialCommunityIcons style={{ color: Styles.green.backgroundColor }} name='plus-circle' size={22} /></MenuTrigger>
-                                                <MenuOptions customStyles={optionsStyles}>
+                                                <MenuOptions >
                                                     {
                                                         data.map((workout, workoutIndex) => {
                                                             return (
-                                                                <MenuOption onSelect={() => onAttachWorkout(workout, day)}><Text style={{ fontSize: 16 }}>{workout.wor_name}</Text></MenuOption>
+                                                                <MenuOption key={workoutIndex} onSelect={() => onAttachWorkout(workout, day)}><Text style={{ fontSize: 16 }}>{workout.wor_name}</Text></MenuOption>
                                                             )
                                                         })
                                                     }
@@ -112,7 +116,6 @@ export function AddSplit({ navigation, route }) {
                                         </View>
                                     </View>
                                 </View>
-
                             </Card>
                         );
                     })

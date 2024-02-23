@@ -93,7 +93,10 @@ export function SplitScreen({ navigation, route }) {
         return (
             <View key={item.id} style={{ flex: 1 }}>
                 {
-                    <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 15 }}>{
+                    <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 15 }}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
+                    }>{
                         Object.keys(item).map((day, i) => (
                             <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetailsSplit', { workout: item[day].workout }) }}>
                                 <Card containerStyle={[Styles.card, item[day].completed ? Styles.green : null]}>

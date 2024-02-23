@@ -1,11 +1,11 @@
 import { db } from "../firebaseConfig";
-import { collection, query, getDocs, where, addDoc, updateDoc, getDoc, doc } from "firebase/firestore";
+import { collection, query, getDocs, where, addDoc, updateDoc, getDoc, doc, Timestamp } from "firebase/firestore";
 import { getWeekNumber } from './StatsService.Service';
 import { getWorkoutById } from './WorkoutService.Service';
 
 let splitId = null;
 
-async function getSplitId(usr_id) {
+async function getSplitById(usr_id) {
     const collectionRef = collection(db, 'Split');
     const q = query(collectionRef, where("spl_usr_id", "==", usr_id));
     const docSnap = await getDocs(q);
@@ -16,77 +16,97 @@ async function getReferenceWeek(usr_id) {
 
     const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    const docs = await getSplitId(usr_id);
-    if (docs[0].id) {
+    const [doc] = await getSplitById(usr_id);
+    if (!doc || !doc.id) return null;
 
-        splitId = docs[0].id;
+    splitId = doc.id;
 
-        const subCollectionRef = collection(db, 'Split', docs[0].id, 'Split_week');
-        const referenceDoc = await getDocs(subCollectionRef);
+    const subCollectionRef = collection(db, 'Split', doc.id, 'Split_week');
+    const referenceDoc = await getDocs(subCollectionRef);
 
-        let dataMap = [];
+    let dataMap = [];
 
-        for (let i = 0; i < 5; i++) {
-            let doc = referenceDoc.docs[i];
+    for (let i = 0; i < 5; i++) {
+        const doc = referenceDoc.docs[i];
+        const ordinal = doc.data();
+        const promises = weekDays.map(day => getDocs(collection(subCollectionRef, doc.id, day)));
+        const responses = await Promise.all(promises);
 
-            let weekMap = {}
-            const ordinal = doc.data();
-            const promises = [];
-            const workoutMap = [];
-            for (let day of weekDays) {
-                promises.push(getDocs(collection(subCollectionRef, doc.id, day)));
-            }
 
-            await Promise.all(promises).then(responses => {
-                responses.forEach((response, index) => {
-                    if (response) {
-                        const data = response.docs[0].data();
-                        workoutMap.push({ dayIndex: index, workoutId: data.swk_wor_id, completed: data.swk_completed ? data.swk_completed : false });
-                    }
-                });
-            });
+        const workoutMap = responses.map((response, index) => {
+            if (!response) return null;
+            const data = response.docs[0].data();
+            return { dayIndex: index, workoutId: data.swk_wor_id, completed: data.swk_completed ? data.swk_completed : false }
+        });
 
-            const workoutPromise = [];
-            for (let workout of workoutMap) {
-                if (workout && workout.workoutId) {
-                    workoutPromise.push(getWorkoutById(workout.workoutId))
-                } else {
-                    workoutPromise.push(null);
+        await Promise.all(promises).then(responses => {
+            responses.forEach((response, index) => {
+                if (response) {
+                    const data = response.docs[0].data();
+                    workoutMap.push({ dayIndex: index, workoutId: data.swk_wor_id, completed: data.swk_completed ? data.swk_completed : false });
                 }
-            }
-
-            await Promise.all(workoutPromise).then(workouts => {
-                workouts.forEach((workout, index) => {
-                    if (!workout) {
-                        console.log("empty id, adding restday")
-                        workout = { wor_name: 'Rest day', id: '' };
-                    }
-
-                    weekMap[weekDays[index]] = { workout: workout, completed: workoutMap[index].completed, day: weekDays[index], weekId: doc.id }
-                });
             });
+        });
 
-            const weekMapOrdered = {
-                'Monday': weekMap['Monday'],
-                'Tuesday': weekMap['Tuesday'],
-                'Wednesday': weekMap['Wednesday'],
-                'Thursday': weekMap['Thursday'],
-                'Friday': weekMap['Friday'],
-                'Saturday': weekMap['Saturday'],
-                'Sunday': weekMap['Sunday']
-            };
+        const workouts = await Promise.all(workoutMap.map(workout => {
+            if (!workout || !workout.workoutId) {
+                console.log("empty id, adding restday");
+                return { wor_name: 'Rest day', id: '' };
+            }
+            return getWorkoutById(workout.workoutId);
+        }));
 
-            dataMap.push({ weekMapOrdered, ...ordinal });
+        const weekMap = workouts.reduce((acc, workout, index) => {
+            acc[weekDays[index]] = { workout, completed: workoutMap[index].completed, day: weekDays[index], weekId: doc.id };
+            return acc;
+        }, {});
 
+        const weekMapOrdered = weekDays.reduce((acc, day) => {
+            acc[day] = weekMap[day];
+            return acc;
+        }, {});
+
+        /*const workoutPromise = [];
+        for (let workout of workoutMap) {
+            if (workout && workout.workoutId) {
+                workoutPromise.push(getWorkoutById(workout.workoutId))
+            } else {
+                workoutPromise.push(null);
+            }
         }
 
-        // This is just needed to add the first view in the carousel, does not contain any data.
-        dataMap.push({ weekMapOrdered: null, ordinal: -1 })
-        dataMap.sort((a, b) => a.ordinal >= b.ordinal);
-        const sorteredDataMap = dataMap.map((data) => data.weekMapOrdered);
-        return { weeks: sorteredDataMap, spl_ref_week: docs[0].data().spl_ref_week };
+        await Promise.all(workoutPromise).then(workouts => {
+            workouts.forEach((workout, index) => {
+                if (!workout) {
+                    console.log("empty id, adding restday")
+                    workout = { wor_name: 'Rest day', id: '' };
+                }
+
+                weekMap[weekDays[index]] = { workout: workout, completed: workoutMap[index].completed, day: weekDays[index], weekId: doc.id }
+            });
+        });*/
+
+        /*const weekMapOrdered = {
+            'Monday': weekMap['Monday'],
+            'Tuesday': weekMap['Tuesday'],
+            'Wednesday': weekMap['Wednesday'],
+            'Thursday': weekMap['Thursday'],
+            'Friday': weekMap['Friday'],
+            'Saturday': weekMap['Saturday'],
+            'Sunday': weekMap['Sunday']
+        };*/
+
+        dataMap.push({ weekMapOrdered, ...ordinal });
+
     }
-    return null;
+
+    // This is just needed to add the first view in the carousel, does not contain any data.
+    dataMap.push({ weekMapOrdered: null, ordinal: -1 })
+    dataMap.sort((a, b) => a.ordinal >= b.ordinal);
+
+    const sorteredDataMap = dataMap.map((data) => data.weekMapOrdered);
+    return { weeks: sorteredDataMap, spl_ref_week: doc.data().spl_ref_week };
+
 }
 
 
@@ -103,18 +123,35 @@ async function addReferenceWeek(referenceWeek, usr_id) {
     const currentWeek = getWeekNumber(new Date());
     const splitDocumentData = {
         spl_usr_id: usr_id,
-        spl_ref_week: currentWeek
+        spl_ref_week: currentWeek,
+        spl_created: Timestamp.fromDate(new Date()),
     };
 
     try {
         const docRef = await addDoc(collection(db, 'Split'), splitDocumentData);
-
         const generatedWeeks = convertToWeekData(referenceWeek, currentWeek);
         console.log(generatedWeeks);
 
-        Object.keys(generatedWeeks).forEach(async (week, i) => {
+        const batch = firestore.batch();
 
-            // move this shit to promises
+        for (const [i, week] of Object.keys(generatedWeeks).entries()) {
+            const collectionRef = collection(db, 'Split', docRef.id, 'Split_week');
+            const refDocRef = await addDoc(collectionRef, { ordinal: i }, { batch });
+
+            const promises = weekDays.map(day => {
+                const data = {
+                    swk_wor_id: generatedWeeks[week][day] ? generatedWeeks[week][day].id : null,
+                    swk_completed: false
+                };
+                return addDoc(collection(collectionRef, refDocRef.id, day), data, { batch });
+            });
+
+            await Promise.all(promises);
+        }
+
+        await batch.commit();
+
+        /*Object.keys(generatedWeeks).forEach(async (week, i) => {
 
             const collectionRef = collection(db, 'Split', docRef.id, 'Split_week')
             const refDocRef = await addDoc(collectionRef, {
@@ -150,7 +187,7 @@ async function addReferenceWeek(referenceWeek, usr_id) {
             })
 
 
-        });
+        });*/
 
     } catch (error) {
         console.log(error);
@@ -163,11 +200,15 @@ async function addReferenceWeek(referenceWeek, usr_id) {
 
 async function removeOldSplitIfExists(usr_id) {
 
-    const docs = await getSplitId(usr_id);
+    const docs = await getSplitById(usr_id);
 
-    if (docs && docs.length > 1 ) {
+    if (docs && docs.length > 1) {
 
-        //todo
+        //TODO: 
+        docs.sort((a, b) => a.data().spl_created >= b.data().spl_created);
+        updateDoc(doc(db, 'Split', docs[0].id), {
+            spl_usr_id: null
+        });
 
     }
 
