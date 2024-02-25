@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, Dimensions, ScrollView, RefreshControl } from "react-native";
+import { View, Text, TouchableOpacity, Dimensions, ScrollView, RefreshControl, FlatList } from "react-native";
 import { Button, Card } from 'react-native-elements';
 import Carousel from "react-native-snap-carousel";
 import { getReferenceWeek, markDayAsCompleted } from '../../services/SplitService.Service';
@@ -24,7 +24,6 @@ export function SplitScreen({ navigation, route }) {
     const sliderWidth = Dimensions.get('window').width;
     let carouselRef = useRef(null);
     const [weekData, setWeekData] = useState(null);
-    const [data, setData] = useState(null);
     const [isLoading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const currentWeek = getWeekNumber(new Date());
@@ -94,47 +93,46 @@ export function SplitScreen({ navigation, route }) {
     const _renderItem = ({ item, index }) => {
         if (index == 0) {
             return (
-                <FirstIndexComponent text={''}/>
+                <FirstIndexComponent text={''} />
             );
         }
-
+        const keys = Object.keys(item);
+        console.log(item[keys[0]])
         return (
-            <View key={item.id} style={{ flex: 1 }}>
-                {
-                    <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 15 }}
-                        refreshControl={
-                            <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
-                        }>{
-                            Object.keys(item).map((day, i) => (
-                                <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetailsSplit', { workout: item[day].workout }) }}>
-                                    <Card containerStyle={[Styles.card, item[day].completed ? Styles.green : null]}>
-                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <View>
-                                                <Text style={Styles.cardTitle}>
-                                                    <MaterialCommunityIcons style={Styles.icon} name='calendar' size={22} />
-                                                    {' ' + day}
-                                                </Text>
-                                                <Text style={{ ...Styles.fontColor, fontSize: 18, marginLeft: 10 }}>
-                                                    <MaterialCommunityIcons style={Styles.icon} name='weight-lifter' size={22} />
-                                                    {' ' + item[day].workout.wor_name}
-                                                </Text>
-                                            </View>
-                                            <View style={{ justifyContent: 'center', alignContent: 'center', marginRight: 10 }}>
-                                                <TouchableOpacity style={{ padding: 10 }} onPress={() => markAsCompleted(index, day)}>
-                                                    {
-                                                        !item[day].completed ?
-                                                            (<MaterialCommunityIcons style={Styles.icon} name="check" size={35} />) :
-                                                            (<MaterialCommunityIcons style={Styles.icon} name="window-close" size={35} />)
-                                                    }
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
-                                    </Card>
-                                </TouchableOpacity>
-                            )
-                            )
-                        }</ScrollView>
-                }
+            <View style={{ flex: 1 }}>
+                <FlatList
+                    contentContainerStyle={{paddingBottom: 10}}
+                    data={keys}
+                    renderItem={({ item: day }) => (
+                        <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetailsSplit', { workout: item[day].workout }) }}>
+                            <Card containerStyle={[Styles.card, item[day].completed ? Styles.green : null]}>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <View>
+                                        <Text style={Styles.cardTitle}>
+                                            <MaterialCommunityIcons style={Styles.icon} name='calendar' size={22} />
+                                            {' ' + day}
+                                        </Text>
+                                        <Text style={{ ...Styles.fontColor, fontSize: 18, marginLeft: 10 }}>
+                                            <MaterialCommunityIcons style={Styles.icon} name='weight-lifter' size={22} />
+                                            {' ' + item[day].workout.wor_name}
+                                        </Text>
+                                    </View>
+                                    <View style={{ justifyContent: 'center', alignContent: 'center', marginRight: 10 }}>
+                                        <TouchableOpacity style={{ padding: 10 }} onPress={() => markAsCompleted(index, day)}>
+                                            {
+                                                !item[day].completed ?
+                                                    (<MaterialCommunityIcons style={Styles.icon} name="check" size={35} />) :
+                                                    (<MaterialCommunityIcons style={Styles.icon} name="window-close" size={35} />)
+                                            }
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </Card>
+                        </TouchableOpacity>
+                    )}
+                    keyExtractor={(item, index) => index.toString()}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />}
+                />
             </View>
         );
     };

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import Slider from '@react-native-community/slider';
 import { Card, Button, Title } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { addReferenceWeek } from '../../services/SplitService.Service';
@@ -21,6 +22,8 @@ export function AddSplit({ navigation, route }) {
     const [data, setData] = useState([])
     const [isLoading, setLoading] = useState(true);
     const [isAddLoading, setAddLoading] = useState(true);
+    const [splitLength, setSplitLength] = useState(5);
+
 
     const _onRefresh = React.useCallback(() => {
         setRefreshing(true);
@@ -61,8 +64,8 @@ export function AddSplit({ navigation, route }) {
 
     const onAddSplit = async () => {
         try {
-            setAddLoading(true);
-            await addReferenceWeek(workoutPairs, userId);
+            setLoading(true);
+            await addReferenceWeek(workoutPairs, splitLength, userId);
         } catch (error) {
             console.log(error);
         }
@@ -72,15 +75,9 @@ export function AddSplit({ navigation, route }) {
         }
     }
 
-    /*if (isAddLoading) {
-        return (
-            <LoadingIndicator text={ 'Adding split...'} />
-        )
-    }*/
-
     if (isLoading) {
         return (
-            <LoadingIndicator text={ 'loading existing workouts...'} />
+            <LoadingIndicator text={'loading existing workouts...'} />
         )
     }
     return (
@@ -120,6 +117,15 @@ export function AddSplit({ navigation, route }) {
                         );
                     })
                 }
+                <Text style={{...Styles.detailText, marginLeft: 5}}>Split length: {splitLength}</Text>
+                <Slider
+                    step={1}
+                    maximumValue={10}
+                    minimumValue={1}
+                    value={splitLength}
+                    style={{ marginBottom: 75 }}
+                    onValueChange={value => setSplitLength(value)}
+                />
             </ScrollView>
             <View style={{ position: 'absolute', width: '100%', bottom: 0 }}>
                 <Button title='Add split' buttonStyle={{ margin: 10, ...Styles.green }} onPress={() => { onAddSplit() }} />

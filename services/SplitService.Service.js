@@ -20,6 +20,7 @@ async function getReferenceWeek(usr_id) {
 
     splitId = doc.id;
     console.log(splitId);
+    const splitLength = doc.data().spl_length;
 
     const subCollectionRef = collection(db, 'Split', doc.id, 'Split_week');
     const referenceDoc = await getDocs(subCollectionRef);
@@ -31,7 +32,7 @@ async function getReferenceWeek(usr_id) {
 
     let dataMap = [];
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < splitLength; i++) {
         const doc = referenceDoc.docs[i];
         const ordinal = doc.data();
         const promises = weekDays.map(day => getDocs(collection(subCollectionRef, doc.id, day)));
@@ -55,7 +56,6 @@ async function getReferenceWeek(usr_id) {
 
         const workouts = await Promise.all(workoutMap.map(workout => {
             if (!workout || !workout.workoutId) {
-                console.log("empty id, adding restday");
                 return { wor_name: 'Rest day', id: '' };
             }
             return getWorkoutById(workout.workoutId);
@@ -93,18 +93,19 @@ async function markDayAsCompleted(weekId, day, completed) {
     });
 }
 
-async function addReferenceWeek(referenceWeek, usr_id) {
+async function addReferenceWeek(referenceWeek, splitLength, usr_id) {
 
     const currentWeek = getWeekNumber(new Date());
     const splitDocumentData = {
         spl_usr_id: usr_id,
         spl_ref_week: currentWeek,
+        spl_length: splitLength,
         spl_created: Timestamp.fromDate(new Date()),
     };
 
     try {
         const docRef = await addDoc(collection(db, 'Split'), splitDocumentData);
-        const generatedWeeks = convertToWeekData(referenceWeek, currentWeek);
+        const generatedWeeks = convertToWeekData(referenceWeek, splitLength, currentWeek);
 
         const batch = writeBatch(db);
 
@@ -133,7 +134,6 @@ async function addReferenceWeek(referenceWeek, usr_id) {
 
 }
 
-
 async function removeOldSplitIfExists(usr_id) {
 
     const docs = await getSplitById(usr_id);
@@ -147,12 +147,11 @@ async function removeOldSplitIfExists(usr_id) {
         });
 
     }
-
 }
 
-function convertToWeekData(splitData, refWeek) {
+function convertToWeekData(splitData, splitLength, refWeek) {
 
-    const numberOfFutureWeeks = 5; // The number of week forward the split is calculated.
+    const numberOfFutureWeeks = splitLength ? splitLength : 5; // The number of week forward the split is calculated.
     const referenceWeekNumber = refWeek ? refWeek : getWeekNumber(new Date());
     const currentWeekNumber = getWeekNumber(new Date());
 
