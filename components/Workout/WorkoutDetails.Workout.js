@@ -122,6 +122,12 @@ export function WorkoutDetails({ navigation, route }) {
 
     }, []);
 
+    const HeaderTextComponent = ({ text }) => {
+        return (
+            <Text style={{ fontSize: 18, color: 'gray' }}>{text}</Text>
+        )
+    }
+
     useEffect(() => {
         let intervalId;
         if (running) {
@@ -131,17 +137,24 @@ export function WorkoutDetails({ navigation, route }) {
                 }
             }, 1000);
         }
-        navigation.setOptions({
-            headerTitle: () => (
-                <View style={{ paddingBottom: 8 }}>
-                    <Text style={{ fontSize: 24, fontWeight: 'bold', ...Styles.fontColor }}>{workout.wor_name}</Text>
-                    <Text style={{ fontSize: 18, color: 'gray' }}>{getFormattedTime(time)}</Text>
-                </View>
-            ),
-        });
 
         return () => clearInterval(intervalId);
     }, [running, time]);
+
+    navigation.setOptions({
+        headerTitle: () => (
+            <View style={{ paddingBottom: 8 , flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View>
+                    <Text style={{ fontSize: 24, fontWeight: 'bold', ...Styles.fontColor }}>{workout.wor_name}</Text>
+                    <HeaderTextComponent text={time ? getFormattedTime(time) : '00:00:00'} />
+                </View>
+                <TouchableOpacity style={{ paddingLeft: 5, }}
+                    onPress={() => { openEdit() }}>
+                    {!edit ? <MaterialCommunityIcons name='pencil' size={24} style={Styles.icon} /> : <MaterialCommunityIcons name='window-close' size={24} style={Styles.icon} />}
+                </TouchableOpacity>
+            </View>
+        ),
+    });
 
     const startAndStop = () => {
         if (startTime != null) {
@@ -156,6 +169,7 @@ export function WorkoutDetails({ navigation, route }) {
     const opacity = useState(new Animated.Value(0))[0];
 
     const openEdit = () => {
+        console.log('openEdit')
         if (!edit) {
             Animated.timing(opacity, {
                 toValue: 1,
@@ -169,7 +183,7 @@ export function WorkoutDetails({ navigation, route }) {
                 useNativeDriver: false,
             }).start(setEdit(!edit));
         }
-    
+
     };
 
     const size = opacity.interpolate({
@@ -209,14 +223,10 @@ export function WorkoutDetails({ navigation, route }) {
                                                         width: size,
                                                         flexDirection: 'row'
                                                     }}>
-                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { warnUser(workout) }}><MaterialCommunityIcons name='trash-can-outline' size={24} style={Styles.icon} /></TouchableOpacity>
-                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { moveExerciseBackwards(i) }}><MaterialCommunityIcons name='arrow-up' size={24} style={Styles.icon} /></TouchableOpacity>
-                                                        <TouchableOpacity style={{ paddingRight: 5 }} onPress={() => { moveExerciseForward(i) }}><MaterialCommunityIcons name='arrow-down' size={24} style={Styles.icon} /></TouchableOpacity>
+                                                        <TouchableOpacity style={{ paddingRight: 10 }} onPress={() => { moveExerciseBackwards(i) }}><MaterialCommunityIcons name='arrow-up' size={24} style={Styles.icon} /></TouchableOpacity>
+                                                        <TouchableOpacity style={{ paddingRight: 0 }} onPress={() => { moveExerciseForward(i) }}><MaterialCommunityIcons name='arrow-down' size={24} style={Styles.icon} /></TouchableOpacity>
                                                     </Animated.View>
-                                                    <TouchableOpacity style={{ paddingLeft: 5 }}
-                                                        onPress={() => { openEdit() }}>
-                                                        {!edit ? <MaterialCommunityIcons name='pencil' size={24} style={Styles.icon} /> : <MaterialCommunityIcons name='window-close' size={24} style={Styles.icon} />}
-                                                    </TouchableOpacity>
+                                                    <TouchableOpacity style={{ paddingLeft: 0 }} onPress={() => { warnUser(workout) }}><MaterialCommunityIcons name='trash-can-outline' size={24} style={Styles.icon} /></TouchableOpacity>
                                                 </View>
                                             </View>
 

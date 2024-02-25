@@ -33,7 +33,9 @@ export function SplitScreen({ navigation, route }) {
     const load = async () => {
         setLoading(true);
         const data = await getReferenceWeek(user.id);
-        setWeekData(data.weeks);
+        if (data) {
+            setWeekData(data.weeks);
+        }
         setLoading(false);
     }
 
@@ -72,21 +74,27 @@ export function SplitScreen({ navigation, route }) {
         markDayAsCompleted(weekData[week][day].weekId, weekData[week][day].day, weekData[week][day].completed);
     }
 
+
+    const FirstIndexComponent = ({ text }) => {
+        return (
+            <View key={0} style={{ flex: 1, backgroundColor: Styles.dark.backgroundColor }}>
+                <View style={{ flex: 1, justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 20, justifyContent: 'center', textAlign: 'center', color: Styles.fontColor.color }}>
+                        When creating a new split, all the following weeks will be based on your reference week. Add the split that you want and the following weeks will be automatically generated.
+                    </Text>
+                </View>
+                <View style={{ flex: 1, backgroundColor: Styles.dark.backgroundColor, alignContent: 'center' }}>
+                    <Button onPress={() => { navigation.navigate('addSplit', { userId: user.id }) }}
+                        buttonStyle={{ ...Styles.green, alignSelf: 'center' }} title={'Create a new split'} />
+                </View>
+            </View>
+        )
+    }
+
     const _renderItem = ({ item, index }) => {
         if (index == 0) {
             return (
-                <View key={index} style={{ flex: 1 }}>
-                    <View style={{flex: 1, justifyContent: 'center'}}>
-                        <Text style={{ fontSize: 20, justifyContent: 'center', textAlign: 'center', color: Styles.fontColor.color }}>
-                            When creating a new split, all the following weeks will be based on your reference week. Add the split that you want and the following weeks will be automatically generated.
-                        </Text>
-                    </View>
-
-                    <View style={{ flex: 1, backgroundColor: Styles.dark.backgroundColor, justifyContent: 'center', alignContent: 'center' }}>
-                        <Button onPress={() => { navigation.navigate('addSplit', { userId: user.id }) }}
-                            buttonStyle={{ ...Styles.green, alignSelf: 'center' }} title={'Create a new split'} />
-                    </View>
-                </View>
+                <FirstIndexComponent text={''}/>
             );
         }
 
@@ -94,38 +102,38 @@ export function SplitScreen({ navigation, route }) {
             <View key={item.id} style={{ flex: 1 }}>
                 {
                     <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 15 }}
-                    refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
-                    }>{
-                        Object.keys(item).map((day, i) => (
-                            <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetailsSplit', { workout: item[day].workout }) }}>
-                                <Card containerStyle={[Styles.card, item[day].completed ? Styles.green : null]}>
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <View>
-                                            <Text style={Styles.cardTitle}>
-                                                <MaterialCommunityIcons style={Styles.icon} name='calendar' size={22} />
-                                                {' ' + day}
-                                            </Text>
-                                            <Text style={{ ...Styles.fontColor, fontSize: 18, marginLeft: 10 }}>
-                                                <MaterialCommunityIcons style={Styles.icon} name='weight-lifter' size={22} />
-                                                {' ' + item[day].workout.wor_name}
-                                            </Text>
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
+                        }>{
+                            Object.keys(item).map((day, i) => (
+                                <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetailsSplit', { workout: item[day].workout }) }}>
+                                    <Card containerStyle={[Styles.card, item[day].completed ? Styles.green : null]}>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <View>
+                                                <Text style={Styles.cardTitle}>
+                                                    <MaterialCommunityIcons style={Styles.icon} name='calendar' size={22} />
+                                                    {' ' + day}
+                                                </Text>
+                                                <Text style={{ ...Styles.fontColor, fontSize: 18, marginLeft: 10 }}>
+                                                    <MaterialCommunityIcons style={Styles.icon} name='weight-lifter' size={22} />
+                                                    {' ' + item[day].workout.wor_name}
+                                                </Text>
+                                            </View>
+                                            <View style={{ justifyContent: 'center', alignContent: 'center', marginRight: 10 }}>
+                                                <TouchableOpacity style={{ padding: 10 }} onPress={() => markAsCompleted(index, day)}>
+                                                    {
+                                                        !item[day].completed ?
+                                                            (<MaterialCommunityIcons style={Styles.icon} name="check" size={35} />) :
+                                                            (<MaterialCommunityIcons style={Styles.icon} name="window-close" size={35} />)
+                                                    }
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
-                                        <View style={{ justifyContent: 'center', alignContent: 'center', marginRight: 10 }}>
-                                            <TouchableOpacity style={{ padding: 10 }} onPress={() => markAsCompleted(index, day)}>
-                                                {
-                                                    !item[day].completed ?
-                                                        (<MaterialCommunityIcons style={Styles.icon} name="check" size={35} />) :
-                                                        (<MaterialCommunityIcons style={Styles.icon} name="window-close" size={35} />)
-                                                }
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                </Card>
-                            </TouchableOpacity>
-                        )
-                        )
-                    }</ScrollView>
+                                    </Card>
+                                </TouchableOpacity>
+                            )
+                            )
+                        }</ScrollView>
                 }
             </View>
         );
@@ -139,10 +147,7 @@ export function SplitScreen({ navigation, route }) {
 
     if (!weekData) {
         return (
-            <View style={{ flex: 1, backgroundColor: Styles.dark.backgroundColor, justifyContent: 'center', alignContent: 'center' }}>
-                <Button onPress={() => { navigation.navigate('addSplit', { userId: user.id }) }}
-                    buttonStyle={{ ...Styles.green, alignSelf: 'center' }} title={'Create your split'} />
-            </View>
+            <FirstIndexComponent />
         )
     }
 

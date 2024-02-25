@@ -1,9 +1,10 @@
 import { db } from "../firebaseConfig";
-import { collection, query, getDocs, where, addDoc, updateDoc, getDoc, doc, Timestamp } from "firebase/firestore";
+import { collection, query, getDocs, where, addDoc, updateDoc, getDoc, doc, Timestamp, writeBatch } from "firebase/firestore";
 import { getWeekNumber } from './StatsService.Service';
 import { getWorkoutById } from './WorkoutService.Service';
 
 let splitId = null;
+const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 async function getSplitById(usr_id) {
     const collectionRef = collection(db, 'Split');
@@ -14,15 +15,19 @@ async function getSplitById(usr_id) {
 
 async function getReferenceWeek(usr_id) {
 
-    const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
     const [doc] = await getSplitById(usr_id);
     if (!doc || !doc.id) return null;
 
     splitId = doc.id;
+    console.log(splitId);
 
     const subCollectionRef = collection(db, 'Split', doc.id, 'Split_week');
     const referenceDoc = await getDocs(subCollectionRef);
+    console.log(referenceDoc.docs.length)
+    if (!referenceDoc || !referenceDoc.docs.length > 0) {
+        console.log('Could not find split weeks...');
+        return null;
+    } 
 
     let dataMap = [];
 
@@ -66,36 +71,6 @@ async function getReferenceWeek(usr_id) {
             return acc;
         }, {});
 
-        /*const workoutPromise = [];
-        for (let workout of workoutMap) {
-            if (workout && workout.workoutId) {
-                workoutPromise.push(getWorkoutById(workout.workoutId))
-            } else {
-                workoutPromise.push(null);
-            }
-        }
-
-        await Promise.all(workoutPromise).then(workouts => {
-            workouts.forEach((workout, index) => {
-                if (!workout) {
-                    console.log("empty id, adding restday")
-                    workout = { wor_name: 'Rest day', id: '' };
-                }
-
-                weekMap[weekDays[index]] = { workout: workout, completed: workoutMap[index].completed, day: weekDays[index], weekId: doc.id }
-            });
-        });*/
-
-        /*const weekMapOrdered = {
-            'Monday': weekMap['Monday'],
-            'Tuesday': weekMap['Tuesday'],
-            'Wednesday': weekMap['Wednesday'],
-            'Thursday': weekMap['Thursday'],
-            'Friday': weekMap['Friday'],
-            'Saturday': weekMap['Saturday'],
-            'Sunday': weekMap['Sunday']
-        };*/
-
         dataMap.push({ weekMapOrdered, ...ordinal });
 
     }
@@ -130,9 +105,8 @@ async function addReferenceWeek(referenceWeek, usr_id) {
     try {
         const docRef = await addDoc(collection(db, 'Split'), splitDocumentData);
         const generatedWeeks = convertToWeekData(referenceWeek, currentWeek);
-        console.log(generatedWeeks);
 
-        const batch = firestore.batch();
+        const batch = writeBatch(db);
 
         for (const [i, week] of Object.keys(generatedWeeks).entries()) {
             const collectionRef = collection(db, 'Split', docRef.id, 'Split_week');
@@ -150,44 +124,6 @@ async function addReferenceWeek(referenceWeek, usr_id) {
         }
 
         await batch.commit();
-
-        /*Object.keys(generatedWeeks).forEach(async (week, i) => {
-
-            const collectionRef = collection(db, 'Split', docRef.id, 'Split_week')
-            const refDocRef = await addDoc(collectionRef, {
-                ordinal: i
-            });
-            await addDoc(collection(collectionRef, refDocRef.id, 'Monday'), {
-                swk_wor_id: generatedWeeks[week]['Monday'] ? generatedWeeks[week]['Monday'].id : null,
-                swk_completed: false
-            });
-            await addDoc(collection(collectionRef, refDocRef.id, 'Tuesday'), {
-                swk_wor_id: generatedWeeks[week]['Tuesday'] ? generatedWeeks[week]['Tuesday'].id : null,
-                swk_completed: false
-            })
-            await addDoc(collection(collectionRef, refDocRef.id, 'Wednesday'), {
-                swk_wor_id: generatedWeeks[week]['Wednesday'] ? generatedWeeks[week]['Wednesday'].id : null,
-                swk_completed: false
-            })
-            await addDoc(collection(collectionRef, refDocRef.id, 'Thursday'), {
-                swk_wor_id: generatedWeeks[week]['Thursday'] ? generatedWeeks[week]['Thursday'].id : null,
-                swk_completed: false
-            })
-            await addDoc(collection(collectionRef, refDocRef.id, 'Friday'), {
-                swk_wor_id: generatedWeeks[week]['Friday'] ? generatedWeeks[week]['Friday'].id : null,
-                swk_completed: false
-            })
-            await addDoc(collection(collectionRef, refDocRef.id, 'Saturday'), {
-                swk_wor_id: generatedWeeks[week]['Saturday'] ? generatedWeeks[week]['Saturday'].id : null,
-                swk_completed: false
-            })
-            await addDoc(collection(collectionRef, refDocRef.id, 'Sunday'), {
-                swk_wor_id: generatedWeeks[week]['Sunday'] ? generatedWeeks[week]['Sunday'].id : null,
-                swk_completed: false
-            })
-
-
-        });*/
 
     } catch (error) {
         console.log(error);
