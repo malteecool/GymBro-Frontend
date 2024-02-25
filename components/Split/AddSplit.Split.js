@@ -21,7 +21,6 @@ export function AddSplit({ navigation, route }) {
     const [refreshing, setRefreshing] = useState(false);
     const [data, setData] = useState([])
     const [isLoading, setLoading] = useState(true);
-    const [isAddLoading, setAddLoading] = useState(true);
     const [splitLength, setSplitLength] = useState(5);
 
 

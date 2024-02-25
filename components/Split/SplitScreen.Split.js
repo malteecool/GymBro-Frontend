@@ -97,7 +97,6 @@ export function SplitScreen({ navigation, route }) {
             );
         }
         const keys = Object.keys(item);
-        console.log(item[keys[0]])
         return (
             <View style={{ flex: 1 }}>
                 <FlatList
