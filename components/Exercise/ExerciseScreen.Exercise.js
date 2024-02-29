@@ -1,4 +1,4 @@
-import { Text, View, ActivityIndicator, TouchableOpacity, ScrollView, TextInput, StyleSheet } from 'react-native';
+import { Text, View, ActivityIndicator, TouchableOpacity, ScrollView, TextInput, StyleSheet, RefreshControl } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Card, Button } from 'react-native-elements';
@@ -14,6 +14,7 @@ export function ExcerciseScreen({ navigation, route }) {
     const [search, setSearch] = useState('');
     const [filteredDataSource, setFilteredDataSource] = useState([]);
     const [masterDataSource, setMasterDataSource] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
 
     const user = route.params.userInfo.user;
     // fetch exercises
@@ -89,6 +90,10 @@ export function ExcerciseScreen({ navigation, route }) {
 
     }, []);
 
+    const _onRefresh = React.useCallback(() => {
+        load();
+    }, []);
+
     if (isLoading) {
         return (<LoadingIndicator text={'Loading exercises...'} />)
     }
@@ -103,35 +108,37 @@ export function ExcerciseScreen({ navigation, route }) {
                     placeholderTextColor={Styles.fontColor.color} // Lighter placeholder text color
                 />
             </View>
-            <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 20 }}>{
-                filteredDataSource.map((item, i) => {
+            <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 20 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />}
+            >{
+                    filteredDataSource.map((item, i) => {
 
-                    var exerciseDate = getFirebaseTimeStamp(item.exe_date.seconds, item.exe_date.nanoseconds);
+                        var exerciseDate = getFirebaseTimeStamp(item.exe_date.seconds, item.exe_date.nanoseconds);
 
-                    return (
-                        <TouchableOpacity key={i} onPress={() => { navigation.navigate('exerciseDetails', { exercise: item },) }}>
-                            <Card containerStyle={Styles.card}>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <View>
-                                        <Text style={Styles.cardTitle}>
-                                            {item.exe_name}
-                                        </Text>
-                                        <Text style={{ ...Styles.fontColor, marginLeft: 10 }}>
-                                            <MaterialCommunityIcons style={{ ...Styles.icon, paddingRight: 10 }} name='weight-kilogram' size={16} />
-                                            {' ' + item.exe_max_weight + '  '}
-                                            <MaterialCommunityIcons style={Styles.icon} name='calendar-range' size={16} />
-                                            {' ' + (item.exe_date !== null ? exerciseDate.toDateString() : "Never")}
-                                        </Text>
+                        return (
+                            <TouchableOpacity key={i} onPress={() => { navigation.navigate('exerciseDetails', { exercise: item },) }}>
+                                <Card containerStyle={Styles.card}>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <View>
+                                            <Text style={Styles.cardTitle}>
+                                                {item.exe_name}
+                                            </Text>
+                                            <Text style={{ ...Styles.fontColor, marginLeft: 10 }}>
+                                                <MaterialCommunityIcons style={{ ...Styles.icon, paddingRight: 10 }} name='weight-kilogram' size={16} />
+                                                {' ' + item.exe_max_weight + '  '}
+                                                <MaterialCommunityIcons style={Styles.icon} name='calendar-range' size={16} />
+                                                {' ' + (item.exe_date !== null ? exerciseDate.toDateString() : "Never")}
+                                            </Text>
+                                        </View>
+                                        <TouchableOpacity onPress={() => removeExercise(item.id)} style={Styles.trashIcon}>
+                                            <MaterialCommunityIcons name="trash-can-outline" size={20} style={Styles.icon} />
+                                        </TouchableOpacity>
                                     </View>
-                                    <TouchableOpacity onPress={() => removeExercise(item.id)} style={Styles.trashIcon}>
-                                        <MaterialCommunityIcons name="trash-can-outline" size={20} style={Styles.icon} />
-                                    </TouchableOpacity>
-                                </View>
-                            </Card>
-                        </TouchableOpacity>
-                    )
-                })
-            }</ScrollView>
+                                </Card>
+                            </TouchableOpacity>
+                        )
+                    })
+                }</ScrollView>
 
             <TouchableOpacity style={{
                 position: 'absolute',

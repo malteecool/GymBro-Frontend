@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Card, Button } from 'react-native-elements';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -10,7 +10,7 @@ import { LoadingIndicator } from '../Misc/LoadingIndicator.Misc';
 
 export function WorkoutScreen({ navigation, route }) {
     const [data, setData] = useState([]);
-
+    const [refreshing, setRefreshing] = useState(false);
     const [isLoading, setLoading] = useState(true);
     const user = route.params.userInfo.user;
 
@@ -73,6 +73,11 @@ export function WorkoutScreen({ navigation, route }) {
         return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
     }
 
+    const _onRefresh = React.useCallback(() => {
+        load();
+    }, []);
+
+
     if (isLoading) {
         return (
             <LoadingIndicator text={'Loading workouts...'} />
@@ -81,7 +86,9 @@ export function WorkoutScreen({ navigation, route }) {
 
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Styles.dark.backgroundColor }}>
-            <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 20 }}>{
+            <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 20 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />}
+            >{
 
                 data.map((item, i) => {
                     return (

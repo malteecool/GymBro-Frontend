@@ -8,6 +8,7 @@ import emitter from "../Custom/CustomEventEmitter.Custom";
 import { removeWorkoutExercise as removeWorkoutExerciseService, getFirebaseTimeStamp } from '../../services/ExerciseService.Service';
 import { getWorkoutExercises, updateWorkout, getFormattedTime, updateWorkoutExerciseOrdinal } from '../../services/WorkoutService.Service';
 import Styles from "../../Styles";
+import { LoadingIndicator } from "../Misc/LoadingIndicator.Misc";
 
 export function WorkoutDetails({ navigation, route }) {
 
@@ -20,7 +21,6 @@ export function WorkoutDetails({ navigation, route }) {
     const [startTime, setStartTime] = useState(0);
     const [intervalTime, setIntervalTime] = useState(0);
     const [edit, setEdit] = useState(false);
-
 
     const load = async () => {
         try {
@@ -138,23 +138,31 @@ export function WorkoutDetails({ navigation, route }) {
             }, 1000);
         }
 
+        navigation.setOptions({
+            headerTitle: () => (
+                <View style={{ paddingBottom: 8, flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
+                    <View>
+                        <Text style={{ fontSize: 24, fontWeight: 'bold', ...Styles.fontColor }}>{workout.wor_name}</Text>
+                        <HeaderTextComponent text={time ? getFormattedTime(time) : '00:00:00'} />
+                    </View>
+                </View>
+            ),
+        });
+
         return () => clearInterval(intervalId);
     }, [running, time]);
 
-    navigation.setOptions({
+    /*navigation.setOptions({
         headerTitle: () => (
-            <View style={{ paddingBottom: 8 , flexDirection: 'row', justifyContent: 'space-between'}}>
+            <View style={{ paddingBottom: 8, flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
                 <View>
                     <Text style={{ fontSize: 24, fontWeight: 'bold', ...Styles.fontColor }}>{workout.wor_name}</Text>
                     <HeaderTextComponent text={time ? getFormattedTime(time) : '00:00:00'} />
                 </View>
-                <TouchableOpacity style={{ paddingLeft: 5, }}
-                    onPress={() => { openEdit() }}>
-                    {!edit ? <MaterialCommunityIcons name='pencil' size={24} style={Styles.icon} /> : <MaterialCommunityIcons name='window-close' size={24} style={Styles.icon} />}
-                </TouchableOpacity>
             </View>
         ),
-    });
+    });*/
+
 
     const startAndStop = () => {
         if (startTime != null) {
@@ -191,12 +199,14 @@ export function WorkoutDetails({ navigation, route }) {
         outputRange: [0, 80],
     });
 
+    if (isLoading) {
+        return (
+            <LoadingIndicator text={'Loading workout...'} />
+        )
+    }
+
     return (
-        <View style={{ flex: 1, backgroundColor: '#121111' }}>{isLoading ? (
-            <View style={Styles.activityIndicator}>
-                <ActivityIndicator />
-            </View>
-        ) : (
+        <View style={{ flex: 1, backgroundColor: '#121111' }}>
             <View style={{ flex: 1 }}>
                 <View>
                     <ScrollView style={{ width: '100%' }} contentContainerStyle={{ paddingBottom: 100 }}>{
@@ -245,20 +255,21 @@ export function WorkoutDetails({ navigation, route }) {
                     position: 'absolute',
                     bottom: 45
                 }}>
-                    <View style={{ flex: 1, margin: 10, marginRight: 2 }}>
-                        <Button buttonStyle={Styles.green} title={running ? 'Stop' : 'Start'} onPress={() => { startAndStop() }} />
+                    <View style={{ flex: 1, margin: 10, marginRight: 2 }}>{
+                        !edit ? <Button buttonStyle={Styles.green} title={running ? 'Stop' : 'Start'} onPress={() => { startAndStop() }} /> : 
+                        <Button buttonStyle={Styles.green} title='Add exercise' onPress={() => { navigation.navigate('addExercise', { userId: workout.wor_usr_id, workoutId: workout.id }) }} />
+                    }
+                        
                     </View>
                     <View style={{ flex: 1, margin: 10, marginLeft: 2 }}>
-                        <Button buttonStyle={Styles.green} onPress={() => { navigation.navigate('addExercise', { userId: workout.wor_usr_id, workoutId: workout.id }) }} title='Add exercise' />
+                        <Button buttonStyle={Styles.green} onPress={() => { openEdit() }} title={!edit ? 'Edit' : 'Done'} />
                     </View>
                 </View>
                 <View style={{ position: 'absolute', width: '100%', bottom: 0 }}>
                     <Button disabled={time <= 0} title='Complete' buttonStyle={{ margin: 10, ...Styles.green }} onPress={() => { saveWorkout() }} />
                 </View>
-            </View >
-        )
-        }
+            </View>
         </View >
-    )
 
+    )
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, RefreshControl } from 'react-native';
 import { Card, Button, Divider } from 'react-native-elements'
 import emitter from '../Custom/CustomEventEmitter.Custom';
 import { getHistory, getFirebaseTimeStamp } from '../../services/ExerciseService.Service'
@@ -15,6 +15,7 @@ export function ExerciseDetails({ navigation, route }) {
     const exercise = route.params.exercise;
     const exerciseId = exercise.id;
     const [isLoading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [isEmpty, setEmpty] = useState(true);
     const [data, setData] = useState([]);
 
@@ -46,6 +47,10 @@ export function ExerciseDetails({ navigation, route }) {
 
     }, []);
 
+    const _onRefresh = React.useCallback(() => {
+        load();
+    }, []);
+
     if (isLoading) {
         return (
             <LoadingIndicator text={''} />
@@ -61,7 +66,9 @@ export function ExerciseDetails({ navigation, route }) {
     return (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Styles.dark.backgroundColor }}>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                <ScrollView style={{ width: '100%' }}>{
+                <ScrollView style={{ width: '100%' }}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={_onRefresh} /> }
+                >{
                     data.map((exercise, i) => (
                         <Card key={i} containerStyle={{
                             ...Styles.card,

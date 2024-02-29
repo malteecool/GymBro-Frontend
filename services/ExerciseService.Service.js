@@ -113,7 +113,6 @@ async function updateExerciseDate(exe_id) {
     })
 }
 
-
 async function addExercise(name, usr_id) {
 
     const documentData = {
@@ -124,6 +123,7 @@ async function addExercise(name, usr_id) {
         exe_usr_id: usr_id
     };
     const docRef = await addDoc(collection(db, "Exercise"), documentData);
+    return docRef.id;
 }
 
 async function updateExerciseMaxWeight(exe_id, weight) {

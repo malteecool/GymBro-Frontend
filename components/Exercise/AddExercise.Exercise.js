@@ -22,6 +22,9 @@ export function AddExercise({ navigation, route }) {
             setLoading(true);
             if (workoutId && exerciseId) {
                 await attachToWorkout(exerciseId, workoutId, masterDataSource.length);
+            } else if (workoutId) {
+                const newExerciseId = await addExercise(name, userId);
+                await attachToWorkout(newExerciseId, workoutId, masterDataSource.length);
             } else {
                 await addExercise(name, userId);
             }
