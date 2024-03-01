@@ -246,7 +246,6 @@ export function WorkoutDetails({ navigation, route }) {
                         })
                     }
                     </ScrollView>
-
                 </View>
                 <View style={{
                     flex: 1,
@@ -256,10 +255,10 @@ export function WorkoutDetails({ navigation, route }) {
                     bottom: 45
                 }}>
                     <View style={{ flex: 1, margin: 10, marginRight: 2 }}>{
-                        !edit ? <Button buttonStyle={Styles.green} title={running ? 'Stop' : 'Start'} onPress={() => { startAndStop() }} /> : 
-                        <Button buttonStyle={Styles.green} title='Add exercise' onPress={() => { navigation.navigate('addExercise', { userId: workout.wor_usr_id, workoutId: workout.id }) }} />
+                        !edit ? <Button buttonStyle={Styles.green} title={running ? 'Stop' : 'Start'} onPress={() => { startAndStop() }} /> :
+                            <Button buttonStyle={Styles.green} title='Add exercise' onPress={() => { navigation.navigate('addExercise', { userId: workout.wor_usr_id, workoutId: workout.id }) }} />
                     }
-                        
+
                     </View>
                     <View style={{ flex: 1, margin: 10, marginLeft: 2 }}>
                         <Button buttonStyle={Styles.green} onPress={() => { openEdit() }} title={!edit ? 'Edit' : 'Done'} />

@@ -46,7 +46,7 @@ export function Card2({ historyId, childToParent }) {
                         )
                     })
                 }
-                <TouchableOpacity style={{ backgroundColor: Styles.green.backgroundColor, padding: 10, borderRadius: 10, marginTop: 15 }} onPress={onAddSet}><Text style={{...Styles.detailText, marginBottom: 0, textAlign: 'center'}}>Add set</Text></TouchableOpacity>
+                <TouchableOpacity style={{ backgroundColor: Styles.green.backgroundColor, padding: 0, borderRadius: 10, marginTop: 15}} onPress={onAddSet}><Text style={{...Styles.detailText, paddingVertical: 6, marginBottom: 0, textAlign: 'center'}}>Add set</Text></TouchableOpacity>
                 
             </Card>
         </View>

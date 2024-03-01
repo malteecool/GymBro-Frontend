@@ -12,7 +12,8 @@ function onlyUnique(value, index, array) {
 
 async function getWorkoutsCount(user) {
     var history = await getHistoryByUser(user.id);
-    const dates = history.map(his => getFirebaseTimeStamp(his.exh_date.seconds, his.exh_date.nanoseconds));
+    let dates = history.map(his => getFirebaseTimeStamp(his.exh_date.seconds, his.exh_date.nanoseconds))
+    .map(date => date.toISOString().split('T')[0]);
     const uniqueDates = dates.filter(onlyUnique);
     const weeklyDates = uniqueDates.filter(d => new Date(d) >= startOfWeek(new Date()));
     return { lifetime: uniqueDates, weekly: weeklyDates };
