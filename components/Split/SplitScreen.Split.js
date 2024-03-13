@@ -33,6 +33,7 @@ export function SplitScreen({ navigation, route }) {
         setLoading(true);
         const data = await getReferenceWeek(user.id);
         if (data) {
+            console.log(data.weeks);
             setWeekData(data.weeks);
         }
         setLoading(false);
@@ -100,10 +101,10 @@ export function SplitScreen({ navigation, route }) {
         return (
             <View style={{ flex: 1 }}>
                 <FlatList
-                    contentContainerStyle={{paddingBottom: 10}}
+                    contentContainerStyle={{ paddingBottom: 10 }}
                     data={keys}
                     renderItem={({ item: day }) => (
-                        <TouchableOpacity key={item.id} onPress={() => { navigation.navigate('workoutDetailsSplit', { workout: item[day].workout }) }}>
+                        <TouchableOpacity key={item.id} onPress={() => { if (item[day].workout) { navigation.navigate('workoutDetailsSplit', { workout: item[day].workout }) } }}>
                             <Card containerStyle={[Styles.card, item[day].completed ? Styles.green : null]}>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <View>
@@ -113,7 +114,7 @@ export function SplitScreen({ navigation, route }) {
                                         </Text>
                                         <Text style={{ ...Styles.fontColor, fontSize: 18, marginLeft: 10 }}>
                                             <MaterialCommunityIcons style={Styles.icon} name='weight-lifter' size={22} />
-                                            {' ' + item[day].workout.wor_name}
+                                            {item[day].workout ? (' ' + item[day].workout.wor_name) : 'Could not find workout'}
                                         </Text>
                                     </View>
                                     <View style={{ justifyContent: 'center', alignContent: 'center', marginRight: 10 }}>

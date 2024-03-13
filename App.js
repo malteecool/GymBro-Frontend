@@ -248,7 +248,7 @@ export default function App() {
 
     if (!auth || !userInfo) {
         return (
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Styles.dark.backgroundColor }}>
                 <Text style={{ padding: 6 }}>Please sign in to store your workouts!</Text>
                 <Button title='Login' onPress={() => promptAsync({ useProxy: false, showInRecents: true })}
                 />
