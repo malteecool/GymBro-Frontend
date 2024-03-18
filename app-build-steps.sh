@@ -1,0 +1,6 @@
+# Android
+echo Generating android build...
+npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle
+cd android/
+echo Assembling release...
+./gradlew assembleRelease
