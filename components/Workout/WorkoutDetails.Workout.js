@@ -105,7 +105,7 @@ export function WorkoutDetails({ navigation, route }) {
                 onPress: () => { return; },
                 style: 'cancel',
             },
-            { text: 'OK', onPress: () => removeWorkoutExercise(exercise.exe_id) },
+            { text: 'OK', onPress: () => removeWorkoutExercise(exercise.id) },
         ]);
     }
 
@@ -151,17 +151,6 @@ export function WorkoutDetails({ navigation, route }) {
 
         return () => clearInterval(intervalId);
     }, [running, time]);
-
-    /*navigation.setOptions({
-        headerTitle: () => (
-            <View style={{ paddingBottom: 8, flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
-                <View>
-                    <Text style={{ fontSize: 24, fontWeight: 'bold', ...Styles.fontColor }}>{workout.wor_name}</Text>
-                    <HeaderTextComponent text={time ? getFormattedTime(time) : '00:00:00'} />
-                </View>
-            </View>
-        ),
-    });*/
 
 
     const startAndStop = () => {
