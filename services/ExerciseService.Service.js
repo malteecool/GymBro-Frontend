@@ -68,7 +68,9 @@ async function getHistory(exerciseId, date) {
     }
     return documentData;
 };
-  
+
+
+
 
 async function getHistoryByUser(userId) {
     var documentData = [];
@@ -93,12 +95,28 @@ function getFirebaseTimeStamp(seconds, nanoseconds) {
     return new Timestamp(seconds, nanoseconds).toDate();
 }
 
+async function removeExerciseHistory(exerciseId) {
+    try {
+        const collectionRef = collection(db, 'Exercise_history');
+        const q = query(collectionRef, where("exh_exe_id", "==", exerciseId));
+        const docSnap = await getDocs(q);
+        console.log('deleting exercise history')
+        for (const historyDoc of docSnap.docs) {
+            console.log(historyDoc.id);
+            await deleteDoc(doc(db, 'Exercise_history', historyDoc.id));
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 async function removeExercise(exe_id, usr_id) {
     try {
         console.log("delete exercise with id: " + exe_id);
         const docRef = await deleteDoc(doc(db, "Exercise", exe_id));
-
         await removeWorkoutExercise(null, exe_id, usr_id);
+
+        removeExerciseHistory(exe_id);
 
     }
     catch (error) {

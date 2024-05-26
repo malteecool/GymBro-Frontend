@@ -67,54 +67,54 @@ export function ExerciseDetails({ navigation, route }) {
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Styles.dark.backgroundColor }}>
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                 <ScrollView style={{ width: '100%' }}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={_onRefresh} /> }
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />}
                 >{
-                    data.map((exercise, i) => (
-                        <Card key={i} containerStyle={{
-                            ...Styles.card,
-                            paddingHorizontal: 0,
-                            paddingBottom: 0,
-                            borderWidth: 1,
-                            backgroundColor: Styles.green.backgroundColor,
-                            borderColor: Styles.lessDark.backgroundColor
-                        }}>
-                            <Card.Title style={{
-                                ...Styles.cardTitle,
-                                color: '#E5E3D4',
-                                alignSelf: 'flex-start',
-                                paddingHorizontal: 16,
-                                fontSize: 25,
+                        data.map((exercise, i) => (
+                            <Card key={i} containerStyle={{
+                                ...Styles.card,
+                                paddingHorizontal: 0,
+                                paddingBottom: 0,
+                                borderWidth: 1,
                                 backgroundColor: Styles.green.backgroundColor,
-                                marginLeft: 0
+                                borderColor: Styles.lessDark.backgroundColor
                             }}>
-                                <Text style={{ fontSize: 30 }}>{getFirebaseTimeStamp(exercise.exh_date.seconds, exercise.exh_date.nanoseconds).toDateString()}</Text>
-                            </Card.Title>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', paddingBottom: 5, }}>
-                                <Text style={{ marginHorizontal: 0, ...Styles.detailText, fontWeight: 'bold', width: '50%', textAlign: 'center' }}>{LABEL_WEIGHT}</Text>
-                                <Text style={{ marginHorizontal: 0, ...Styles.detailText, fontWeight: 'bold', width: '50%', textAlign: 'center' }}>{LABEL_REPS}</Text>
-                            </View>
-                            {
-                                (exercise.exh_sets !== null && exercise.exh_sets !== undefined) &&
-                                exercise.exh_sets.map((set, i) => {
-                                    return (
-                                        <View key={i} style={{ backgroundColor: Styles.fontColor.color }}>
-                                            <Divider width={1} color={Styles.lessDark.backgroundColor} />
-                                            <View style={{
-                                                flexDirection: 'row',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-evenly',
+                                <Card.Title style={{
+                                    ...Styles.cardTitle,
+                                    color: '#E5E3D4',
+                                    alignSelf: 'flex-start',
+                                    paddingHorizontal: 16,
+                                    fontSize: 25,
+                                    backgroundColor: Styles.green.backgroundColor,
+                                    marginLeft: 0
+                                }}>
+                                    <Text style={{ fontSize: 30 }}>{getFirebaseTimeStamp(exercise.exh_date.seconds, exercise.exh_date.nanoseconds).toDateString()}</Text>
+                                </Card.Title>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', paddingBottom: 5, }}>
+                                    <Text style={{ marginHorizontal: 0, ...Styles.detailText, fontWeight: 'bold', width: '50%', textAlign: 'center' }}>{LABEL_WEIGHT}</Text>
+                                    <Text style={{ marginHorizontal: 0, ...Styles.detailText, fontWeight: 'bold', width: '50%', textAlign: 'center' }}>{LABEL_REPS}</Text>
+                                </View>
+                                {
+                                    (exercise.exh_sets !== null && exercise.exh_sets !== undefined) &&
+                                    exercise.exh_sets.map((set, i) => {
+                                        return (
+                                            <View key={i} style={{ backgroundColor: Styles.fontColor.color }}>
+                                                <Divider width={1} color={Styles.lessDark.backgroundColor} />
+                                                <View style={{
+                                                    flexDirection: 'row',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-evenly',
 
-                                            }}>
-                                                <Text style={{ ...Styles.detailText, color: Styles.dark.backgroundColor, width: '50%', borderRightWidth: 1, borderColor: Styles.lessDark.backgroundColor, textAlign: 'center' }}>{set.set_weight}</Text>
-                                                <Text style={{ ...Styles.detailText, color: Styles.dark.backgroundColor, width: '50%', textAlign: 'center' }}>{set.set_reps}</Text>
+                                                }}>
+                                                    <Text style={{ ...Styles.detailText, color: Styles.dark.backgroundColor, width: '50%', borderRightWidth: 1, borderColor: Styles.lessDark.backgroundColor, textAlign: 'center' }}>{set.set_weight}</Text>
+                                                    <Text style={{ ...Styles.detailText, color: Styles.dark.backgroundColor, width: '50%', textAlign: 'center' }}>{set.set_reps}</Text>
+                                                </View>
                                             </View>
-                                        </View>
-                                    )
-                                })
-                            }
-                        </Card>
-                    ))
-                }
+                                        )
+                                    })
+                                }
+                            </Card>
+                        ))
+                    }
                 </ScrollView>
             </View>
 
