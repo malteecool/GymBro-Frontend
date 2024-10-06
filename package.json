@@ -6,7 +6,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "build-android": "./app-build-steps.sh"
+    "bundle-android": "npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle",
+    "assemble-release": "cd android && gradlew assembleRelease",
+    "build-android": "npm run bundle-android && npm run assemble-release"
   },
   "dependencies": {
     "@expo/html-elements": "^0.3.1",

@@ -2,18 +2,25 @@ import React, { Component, useEffect, useState } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Card, Divider } from 'react-native-elements';
 import Styles from '../../Styles';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export function Card2({ historyId, childToParent }) {
+export function Card2({ historyId, parentCallback }) {
     const [sets, setSets] = useState([{ set_weight: 0, set_reps: 0 }]);
 
     useEffect(() => {
-        childToParent(sets);
-    });
+        parentCallback(sets);
+    }, [sets]);
 
     const onAddSet = () => {
-        setSets([...sets, { set_weight: 0, set_reps: 0 }])
-        childToParent(sets);
+        setSets([...sets, { set_weight: 0, set_reps: 0 }]);
     };
+
+    const onRemoveSet = (index) => {
+        let newSets = sets;
+        newSets.splice(index, 1);
+        // Need to trigger a rerender of the updates state.
+        setSets([...newSets]);
+    }
 
     return (
         <View style={Styles.dark}>
@@ -40,13 +47,17 @@ export function Card2({ historyId, childToParent }) {
                                     />
 
                                     <Text style={{ paddingHorizontal: 0,  ...Styles.fontColor, fontWeight: 'bold', fontSize: 18 }}>Reps</Text>
+                                    <TouchableOpacity onPress={() => onRemoveSet(i)} style={Styles.trashIcon}>
+                                            <MaterialCommunityIcons name="trash-can-outline" size={20} style={Styles.icon} />
+                                        </TouchableOpacity>
                                 </View>
                                 <Divider color={Styles.yellow.backgroundColor} />
                             </View>
                         )
                     })
                 }
-                <TouchableOpacity style={{ backgroundColor: Styles.green.backgroundColor, padding: 0, borderRadius: 10, marginTop: 15}} onPress={onAddSet}><Text style={{...Styles.detailText, paddingVertical: 6, marginBottom: 0, textAlign: 'center'}}>Add set</Text></TouchableOpacity>
+                <TouchableOpacity style={{ backgroundColor: Styles.green.backgroundColor, padding: 0, borderRadius: 10, marginTop: 15}} 
+                onPress={onAddSet}><Text style={{...Styles.detailText, paddingVertical: 6, marginBottom: 0, textAlign: 'center'}}>Add set</Text></TouchableOpacity>
                 
             </Card>
         </View>

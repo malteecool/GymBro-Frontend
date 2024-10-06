@@ -13,7 +13,10 @@ export function AddSet({ navigation, route }) {
     const [isLoading, setLoading] = useState(false);
     const [data, setData] = useState([]);
 
-    const childToParent = (childData) => {
+
+    // Used to handle updates to this component from child components.
+    const parentCallback = (childData) => {
+        console.log(childData);
         setData(childData);
     }
 
@@ -44,7 +47,7 @@ export function AddSet({ navigation, route }) {
         <View style={{ flex: 1, ...Styles.dark }}>
             <View style={{ flex: 1, }}>
                 <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-                    <Card2 historyId={exercise.id} childToParent={childToParent} />
+                    <Card2 historyId={exercise.id} parentCallback={parentCallback} />
                 </ScrollView>
                 <View style={{ position: 'absolute', width: '100%', bottom: 0 }}>
                     <Button title='Complete' onPress={onAddHistory} buttonStyle={{ margin: 10, height: 40 }} />

@@ -1,6 +1,7 @@
 import { db } from "../firebaseConfig";
 import { collection, query, getDocs, where, Timestamp, deleteDoc, doc, updateDoc, getDoc, addDoc } from "firebase/firestore";
 
+const EXERCISE = 'Exercise'
 
 async function getExercises(usr_id) {
     var documentData = [];
@@ -8,7 +9,6 @@ async function getExercises(usr_id) {
         const collectionRef = collection(db, 'Exercise');
         const q = query(collectionRef, where("exe_usr_id", "==", usr_id));
         const docSnap = await getDocs(q);
-        // would need a remap to create database like objects with id received from doc.id
         for (const doc of docSnap.docs) {
             var exerciseDoc = { "id": doc.id, ...doc.data() };
             documentData.push(exerciseDoc);
@@ -128,11 +128,10 @@ async function updateExerciseDate(exe_id) {
     const date = new Date();
     updateDoc(doc(db, 'Exercise', exe_id), {
         exe_date: new Timestamp.fromDate(new Date())
-    })
+    });
 }
 
 async function addExercise(name, usr_id) {
-
     const documentData = {
         exe_date: Timestamp.fromDate(new Date()),
         exe_name: name,
